@@ -5,7 +5,7 @@ import org.jala.university.application.mapper.SampleEntityMapper;
 import org.jala.university.domain.entity.SampleEntity;
 import org.jala.university.domain.repository.SampleEntityRepository;
 
-public class CreditCardServiceImpl implements CreditCardService {
+public final class CreditCardServiceImpl implements CreditCardService {
     private final SampleEntityRepository sampleEntityRepository;
     private final SampleEntityMapper sampleEntityMapper;
 
