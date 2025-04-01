@@ -5,7 +5,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jala.university.commons.presentation.ViewSwitcher;
-public class MainView extends Application {
+public final class MainView extends Application {
+
+    private static final String APPLICATION_TITLE = "Credit Card Module Application";
 
     @Override
     public void start(Stage primaryStage) {
@@ -13,7 +15,7 @@ public class MainView extends Application {
         ViewSwitcher.setup(primaryStage, scene);
         ViewSwitcher.switchTo(CreditCardView.MAIN.getView());
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Credit Card Module Application");
+        primaryStage.setTitle(APPLICATION_TITLE);
         primaryStage.show();
     }
 }

@@ -2,6 +2,7 @@ package org.jala.university.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Value;
 import org.jala.university.commons.domain.BaseEntity;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,9 +12,9 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Value
+@Data
 @Builder
-public class SampleEntity implements BaseEntity<UUID> {
+public final class SampleEntity implements BaseEntity<UUID> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
