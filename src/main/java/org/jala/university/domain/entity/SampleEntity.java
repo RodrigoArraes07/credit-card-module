@@ -1,10 +1,8 @@
 package org.jala.university.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Value;
-import org.jala.university.commons.domain.BaseEntity;
+import lombok.*;
+import org.jala.university.commons.domain.entity.BaseEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -14,6 +12,8 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public final class SampleEntity implements BaseEntity<UUID> {
 
     @Id
