@@ -1,0 +1,11 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10"
+      fx:controller="org.jala.university.presentation.controller.InvoiceView">
+    <TextField fx:id="totalAmountField" promptText="Total Amount"/>
+    <DatePicker fx:id="closingDatePicker" promptText="Closing Date"/>
+    <DatePicker fx:id="dueDatePicker" promptText="Due Date"/>
+    <CheckBox fx:id="paidCheckBox" text="Is Paid?"/>
+    <Button text="Create Invoice" onAction="#createInvoice"/>
+    <ListView fx:id="invoiceList"/>
+</VBox>
