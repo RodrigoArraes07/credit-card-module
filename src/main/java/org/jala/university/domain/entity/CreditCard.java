@@ -46,6 +46,10 @@ public final class CreditCard implements BaseEntity<UUID> {
     @Enumerated(EnumType.STRING)
     private CreditCardStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @CreatedDate
     private Date createdDate;
 

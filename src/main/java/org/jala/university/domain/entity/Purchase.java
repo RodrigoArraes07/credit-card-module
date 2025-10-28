@@ -26,39 +26,28 @@ public class Purchase implements BaseEntity<UUID> {
     @Column(name = "purchase_id")
     private UUID id;
 
-    @Column(nullable = false, length = 200)
-    private String description;
-
-    @Column(nullable = false)
-    private Double amount;
-
-    @Column(name = "purchase_date", nullable = false)
-    private LocalDateTime purchaseDate;
-
-    @Column(length = 100)
-    private String merchant;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PurchaseCategory category;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PurchaseStatus status;
-
-    @Column(nullable = false)
-    private Integer installments;
-
-    @Column(name = "current_installment")
-    private Integer currentInstallment;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "credit_card_id", nullable = false)
     private CreditCard creditCard;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
+    @Column(length = 100)
+    private String merchant;
+
+    @Column(nullable = false, length = 200)
+    private String description;
+
+    @Column(name = "total_amount", nullable = false)
+    private Double totalAmount;
+
+    @Column(name = "purchase_date", nullable = false)
+    private LocalDateTime purchaseDate;
+
+    @Column(name = "total_installments", nullable = false)
+    private Integer totalInstallments;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PurchaseCategory category;
 
     @CreatedDate
     @Column(name = "created_date")

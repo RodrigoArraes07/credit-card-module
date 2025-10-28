@@ -14,7 +14,7 @@ import java.util.List;
 @Component
 public class InvoiceView {
 
-    private final InvoiceService invoiceService;
+    private InvoiceService invoiceService;
 
     @FXML
     private TextField totalAmountField;
@@ -27,22 +27,29 @@ public class InvoiceView {
     @FXML
     private ListView<Invoice> invoiceList;
 
+    public InvoiceView() {
+    }
+
     public InvoiceView(InvoiceService invoiceService) {
         this.invoiceService = invoiceService;
     }
 
     @FXML
     public void initialize() {
-        refreshInvoiceList();
+        if (invoiceService != null) {
+            refreshInvoiceList();
+        }
     }
 
     @FXML
     public void createInvoice() {
+        if (invoiceService == null) return;
+
         Invoice invoice = new Invoice();
         invoice.setTotalAmount(Double.valueOf(totalAmountField.getText()));
         invoice.setClosingDate(closingDatePicker.getValue());
         invoice.setDueDate(dueDatePicker.getValue());
-        invoice.setPaid(paidCheckBox.isSelected());
+        invoice.setIsPaid(paidCheckBox.isSelected());
         // Preencha creditCard se necessário
 
         invoiceService.createInvoice(invoice);
@@ -50,6 +57,8 @@ public class InvoiceView {
     }
 
     private void refreshInvoiceList() {
+        if (invoiceService == null) return;
+
         List<Invoice> invoices = invoiceService.getAllInvoices();
         invoiceList.getItems().setAll(invoices);
     }
