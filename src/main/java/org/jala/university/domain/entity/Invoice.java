@@ -4,14 +4,15 @@ package org.jala.university.domain.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "invoices")
 public class Invoice {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     private LocalDate closingDate;
     private LocalDate dueDate;
@@ -19,14 +20,14 @@ public class Invoice {
     private Boolean isPaid;
 
     @ManyToOne
-    @JoinColumn(name = "credit_card_id")
+    @JoinColumn(name = "creditCard_id")
     private CreditCard creditCard;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

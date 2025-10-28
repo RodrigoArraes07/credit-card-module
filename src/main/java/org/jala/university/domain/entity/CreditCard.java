@@ -60,4 +60,8 @@ public final class CreditCard implements BaseEntity<UUID> {
     public CreditCard() {
         super();
     }
+
+    public String getNumber() {
+        return cardNumber;
+    }
 }
