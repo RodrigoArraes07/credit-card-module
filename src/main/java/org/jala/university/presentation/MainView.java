@@ -5,9 +5,15 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jala.university.commons.presentation.ViewSwitcher;
+import org.jala.university.infrastructure.config.EnvConfig;
+
 public final class MainView extends Application {
 
     private static final String APPLICATION_TITLE = "Credit Card Module Application";
+
+    static {
+        EnvConfig.load();
+    }
 
     @Override
     public void start(Stage primaryStage) {
