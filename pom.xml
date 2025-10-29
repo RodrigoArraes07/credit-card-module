@@ -28,7 +28,7 @@
       <artifactId>commons-module</artifactId>
       <version>${commons.module.version}</version>
     </dependency>
-    <!--    Third-party libs-->
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
