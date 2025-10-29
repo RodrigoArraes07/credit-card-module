@@ -30,7 +30,7 @@ public class InvoiceMapper {
         dto.setClosingDate(invoice.getClosingDate());
         dto.setDueDate(invoice.getDueDate());
         dto.setTotalAmount(invoice.getTotalAmount());
-        dto.setIsPaid(invoice.getPaid());
+        dto.setIsPaid(invoice.getIsPaid());
         String cardNumber = invoice.getCreditCard().getNumber();
         dto.setCreditCardLast4(cardNumber.substring(cardNumber.length() - 4));
         return dto;
