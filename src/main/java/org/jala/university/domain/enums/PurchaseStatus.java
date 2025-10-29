@@ -1,4 +1,4 @@
-package org.jala.university.domain.entity;
+package org.jala.university.domain.enums;
 
 public enum PurchaseStatus {
     PENDING,

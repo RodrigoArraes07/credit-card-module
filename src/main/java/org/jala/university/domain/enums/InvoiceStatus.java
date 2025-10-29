@@ -1,4 +1,4 @@
-package org.jala.university.domain.entity;
+package org.jala.university.domain.enums;
 
 /**
  * Enum que representa os possíveis status de uma fatura (Invoice).

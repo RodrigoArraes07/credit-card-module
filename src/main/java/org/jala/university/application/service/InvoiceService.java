@@ -1,14 +1,14 @@
 package org.jala.university.application.service;
 
-import org.jala.university.domain.entity.Invoice;
+import org.jala.university.application.dto.InvoiceDto;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 public interface InvoiceService {
-    Invoice createInvoice(Invoice invoice);
-
-    List<Invoice> getAllInvoices();
-
-    Optional<Invoice> getInvoiceById(Long id);
+    List<InvoiceDto> findAll();
+    InvoiceDto findById(UUID id);
+    InvoiceDto create(InvoiceDto invoiceDto);
+    InvoiceDto update(UUID id, InvoiceDto invoiceDto);
+    void deleteById(UUID id);
 }

@@ -3,7 +3,7 @@ package org.jala.university.domain.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.NoArgsConstructor;
 import org.jala.university.commons.domain.entity.BaseEntity;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Invoice implements BaseEntity<UUID> {
+public final class Invoice implements BaseEntity<UUID> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,7 +28,7 @@ public class Invoice implements BaseEntity<UUID> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "credit_card_id", nullable = false)
-    private CreditCard creditCard;
+    private CreditCard creditCardId;
 
     @Column(name = "closing_date", nullable = false)
     private LocalDate closingDate;
@@ -53,9 +53,5 @@ public class Invoice implements BaseEntity<UUID> {
     @Override
     public UUID getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 }

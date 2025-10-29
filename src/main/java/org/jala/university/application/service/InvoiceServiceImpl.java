@@ -1,32 +1,40 @@
 package org.jala.university.application.service;
 
+import lombok.AllArgsConstructor;
+import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.domain.repository.InvoiceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-@Service
+@AllArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
-    private final InvoiceRepository repository;
 
-    public InvoiceServiceImpl(InvoiceRepository repository) {
-        this.repository = repository;
+    @Override
+    public List<InvoiceDto> findAll() {
+        return List.of();
     }
 
     @Override
-    public Invoice createInvoice(Invoice invoice) {
-        return repository.save(invoice);
+    public InvoiceDto findById(UUID id) {
+        return null;
     }
 
     @Override
-    public List<Invoice> getAllInvoices() {
-        return repository.findAll();
+    public InvoiceDto create(InvoiceDto invoiceDto) {
+        return null;
     }
 
     @Override
-    public Optional<Invoice> getInvoiceById(Long id) {
-        return repository.findById(id);
+    public InvoiceDto update(UUID id, InvoiceDto invoiceDto) {
+        return null;
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+
     }
 }

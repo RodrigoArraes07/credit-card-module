@@ -1,5 +1,6 @@
 package org.jala.university.application.mapper;
 
+import org.jala.university.commons.application.mapper.Mapper;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.application.dto.InvoiceDto;
 
@@ -14,25 +15,34 @@ import org.jala.university.application.dto.InvoiceDto;
  * @version 1.0
  */
 
-public class InvoiceMapper {
+public class InvoiceMapper implements Mapper<Invoice, InvoiceDto> {
 
     /**
      * Converte uma entidade Invoice em um InvoiceDto,
      * mascarando informações sensíveis como o número do cartão de crédito.
      *
-     * @param invoice a entidade Invoice a ser convertida
+     * @param input a entidade Invoice a ser convertida
      * @return InvoiceDto com dados filtrados e prontos para exposição ao usuário
      */
+    @Override
+    public InvoiceDto mapTo(Invoice input) {
+        return InvoiceDto.builder()
+                .id(input.getId())
+                .closingDate(input.getClosingDate())
+                .dueDate(input.getDueDate())
+                .totalAmount(input.getTotalAmount())
+                .isPaid(input.getIsPaid())
+                .build();
+    }
 
-    public static InvoiceDto toDto(Invoice invoice) {
-        InvoiceDto dto = new InvoiceDto();
-        dto.setId(invoice.getId());
-        dto.setClosingDate(invoice.getClosingDate());
-        dto.setDueDate(invoice.getDueDate());
-        dto.setTotalAmount(invoice.getTotalAmount());
-        dto.setIsPaid(invoice.getIsPaid());
-        String cardNumber = invoice.getCreditCard().getNumber();
-        dto.setCreditCardLast4(cardNumber.substring(cardNumber.length() - 4));
-        return dto;
+    @Override
+    public Invoice mapFrom(InvoiceDto input) {
+        return Invoice.builder()
+                .id(input.getId())
+                .closingDate(input.getClosingDate())
+                .dueDate(input.getDueDate())
+                .totalAmount(input.getTotalAmount())
+                .isPaid(input.getIsPaid())
+                .build();
     }
 }

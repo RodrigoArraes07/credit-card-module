@@ -1,34 +1,16 @@
 package org.jala.university;
 
 import javafx.application.Application;
-import org.jala.university.infrastructure.config.EnvConfig;
+import javafx.stage.Stage;
 import org.jala.university.presentation.MainView;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
-@EntityScan(basePackages = "org.jala.university.domain.entity")
-@EnableJpaRepositories(basePackages = "org.jala.university.domain.repository")
-public class MainApp {
-
-    private static ConfigurableApplicationContext springContext;
-
-    static {
-        EnvConfig.load();
-    }
-
+public final class MainApp extends Application {
     public static void main(String[] args) {
-        springContext = new SpringApplicationBuilder(MainApp.class)
-                .headless(false)
-                .run(args);
-
-        Application.launch(MainView.class, args);
+        MainView.launch(args);
     }
 
-    public static ConfigurableApplicationContext getSpringContext() {
-        return springContext;
+    @Override
+    public void start(Stage stage) throws Exception {
+        stage.show();
     }
 }

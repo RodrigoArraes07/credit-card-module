@@ -1,22 +1,27 @@
 package org.jala.university.application.dto;
 
-import lombok.Builder;
-import lombok.Data;
-import org.jala.university.domain.entity.CreditCardStatus;
-import org.springframework.boot.jackson.JsonComponent;
+import lombok.*;
+import org.jala.university.domain.enums.CreditCardStatus;
+import org.jala.university.domain.enums.TargetType;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.YearMonth;
 import java.util.UUID;
 
-@Data
 @Builder
-public class CreditCardDto {
+@Getter
+@Setter
+@ToString
+public class CreditCardDto implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private UUID credit_card_id;
-    private String cardNumber;
-    private String holderName;
-    private YearMonth expiration;
+    private int cardNumber;
+    private String maskCardNumber;
     private Double limitAmount;
-    private Double balance;
+    private TargetType targetType;
     private Integer cvc;
     private CreditCardStatus status;
-    }
+}
