@@ -18,7 +18,7 @@ public class CreditCardDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private UUID credit_card_id;
-    private int cardNumber;
+    private String cardNumber;
     private String maskCardNumber;
     private Double limitAmount;
     private TargetType targetType;

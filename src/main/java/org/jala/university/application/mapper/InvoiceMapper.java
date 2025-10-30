@@ -1,5 +1,6 @@
 package org.jala.university.application.mapper;
 
+import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.commons.application.mapper.Mapper;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.application.dto.InvoiceDto;
@@ -15,19 +16,31 @@ import org.jala.university.application.dto.InvoiceDto;
  * @version 1.0
  */
 
-public class InvoiceMapper implements Mapper<Invoice, InvoiceDto> {
+public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
 
     /**
      * Converte uma entidade Invoice em um InvoiceDto,
      * mascarando informações sensíveis como o número do cartão de crédito.
      *
      * @param input a entidade Invoice a ser convertida
-     * @return InvoiceDto com dados filtrados e prontos para exposição ao usuário
+     * @return InvoiceCreateDTO com dados filtrados e prontos para exposição ao usuário
      */
+
+    private static InvoiceMapper instance;
+
+    private InvoiceMapper() {
+    }
+
+    public static InvoiceMapper getInstance() {
+        if (instance == null) {
+            instance = new InvoiceMapper();
+        }
+        return instance;
+    }
+
     @Override
-    public InvoiceDto mapTo(Invoice input) {
-        return InvoiceDto.builder()
-                .id(input.getId())
+    public InvoiceCreateDTO mapTo(Invoice input) {
+        return InvoiceCreateDTO.builder()
                 .closingDate(input.getClosingDate())
                 .dueDate(input.getDueDate())
                 .totalAmount(input.getTotalAmount())
@@ -36,9 +49,8 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceDto> {
     }
 
     @Override
-    public Invoice mapFrom(InvoiceDto input) {
+    public Invoice mapFrom(InvoiceCreateDTO input) {
         return Invoice.builder()
-                .id(input.getId())
                 .closingDate(input.getClosingDate())
                 .dueDate(input.getDueDate())
                 .totalAmount(input.getTotalAmount())

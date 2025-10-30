@@ -15,6 +15,17 @@ public class CreditCardMapper implements Mapper<CreditCard, CreditCardDto> {
      * @param input a entidade CreditCard a ser convertida
      * @return CreditCardDto com dados filtrados e prontos para exposição ao usuário
      */
+    private static CreditCardMapper instance;
+
+    private CreditCardMapper() {
+    }
+
+    public static CreditCardMapper getInstance() {
+        if (instance == null) {
+            instance = new CreditCardMapper();
+        }
+        return instance;
+    }
 
     @Override
     public CreditCardDto mapTo(CreditCard input) {

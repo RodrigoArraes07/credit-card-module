@@ -14,7 +14,7 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <commons.module.version>1.0-SNAPSHOT</commons.module.version>
-    <hibernate.orm.version>6.4.4.Final</hibernate.orm.version>
+    <hibernate.orm.version>6.5.2.Final</hibernate.orm.version>
     <spring.boot.version>3.2.4</spring.boot.version>
     <jakarta.persistence.version>3.1.0</jakarta.persistence.version>
     <lombok.version>1.18.34</lombok.version>
@@ -59,7 +59,7 @@
     </dependency>
 
 
-    <!-- ORM Lib -->
+    <!-- Hibernate ORM Lib -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>

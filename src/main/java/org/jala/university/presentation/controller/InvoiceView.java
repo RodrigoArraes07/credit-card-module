@@ -5,6 +5,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import org.jala.university.application.dto.InvoiceCreateDTO;
+import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.application.service.InvoiceService;
 import org.jala.university.domain.entity.Invoice;
 import org.springframework.stereotype.Component;
@@ -17,15 +19,15 @@ public class InvoiceView {
     private InvoiceService invoiceService;
 
     @FXML
-    private TextField totalAmountField;
-    @FXML
     private DatePicker closingDatePicker;
     @FXML
     private DatePicker dueDatePicker;
     @FXML
-    private CheckBox paidCheckBox;
+    private TextField totalAmountField;
     @FXML
-    private ListView<Invoice> invoiceList;
+    private CheckBox isPaidCheckBox;
+    @FXML
+    private ListView<InvoiceDto> invoiceList;
 
     public InvoiceView() {
     }
@@ -45,21 +47,22 @@ public class InvoiceView {
     public void createInvoice() {
         if (invoiceService == null) return;
 
-        Invoice invoice = new Invoice();
+        InvoiceCreateDTO invoice = new InvoiceCreateDTO();
         invoice.setTotalAmount(Double.valueOf(totalAmountField.getText()));
         invoice.setClosingDate(closingDatePicker.getValue());
         invoice.setDueDate(dueDatePicker.getValue());
-        invoice.setIsPaid(paidCheckBox.isSelected());
+        invoice.setIsPaid(isPaidCheckBox.isSelected());
         // Preencha creditCard se necessário
 
-        invoiceService.createInvoice(invoice);
+        invoiceService.create(invoice);
         refreshInvoiceList();
     }
 
     private void refreshInvoiceList() {
         if (invoiceService == null) return;
 
-        List<Invoice> invoices = invoiceService.getAllInvoices();
+        List<InvoiceDto> invoices = invoiceService.findAll();
+
         invoiceList.getItems().setAll(invoices);
     }
 }

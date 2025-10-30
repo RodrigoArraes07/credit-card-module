@@ -27,7 +27,7 @@ public final class CreditCard implements BaseEntity<UUID> {
     private UUID credit_card_id;
 
     @Column(name = "card_number", unique = true, nullable = false)
-    private int cardNumber;
+    private String cardNumber;
 
     @Column(name = "mask_card_number", nullable = false)
     private String maskCardNumber;

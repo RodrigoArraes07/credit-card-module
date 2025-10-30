@@ -1,6 +1,7 @@
 package org.jala.university.application.service;
 
 import lombok.AllArgsConstructor;
+import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.domain.repository.InvoiceRepository;
@@ -24,7 +25,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public InvoiceDto create(InvoiceDto invoiceDto) {
+    public InvoiceCreateDTO create(InvoiceCreateDTO invoiceDto) {
         return null;
     }
 

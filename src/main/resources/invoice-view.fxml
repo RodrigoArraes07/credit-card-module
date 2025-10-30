@@ -5,7 +5,7 @@
     <TextField fx:id="totalAmountField" promptText="Total Amount"/>
     <DatePicker fx:id="closingDatePicker" promptText="Closing Date"/>
     <DatePicker fx:id="dueDatePicker" promptText="Due Date"/>
-    <CheckBox fx:id="paidCheckBox" text="Is Paid?"/>
+    <CheckBox fx:id="isPaidCheckBox" text="Is Paid?"/>
     <Button text="Create Invoice" onAction="#createInvoice"/>
     <ListView fx:id="invoiceList"/>
 </VBox>
