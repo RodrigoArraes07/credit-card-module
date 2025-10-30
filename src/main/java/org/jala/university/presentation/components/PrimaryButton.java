@@ -26,8 +26,7 @@ public class PrimaryButton extends Button {
                         "-fx-font-size: 14px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
-        );
+                        "-fx-cursor: hand;");
 
         setOnMouseEntered(e -> setStyle(
                 "-fx-background-color: #1976D2;" +
@@ -35,8 +34,7 @@ public class PrimaryButton extends Button {
                         "-fx-font-size: 14px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
-        ));
+                        "-fx-cursor: hand;"));
 
         setOnMouseExited(e -> applyStyles());
     }

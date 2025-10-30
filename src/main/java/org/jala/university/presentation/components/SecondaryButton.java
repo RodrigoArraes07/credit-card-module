@@ -29,8 +29,7 @@ public class SecondaryButton extends Button {
                         "-fx-border-color: #2196F3;" +
                         "-fx-border-radius: 5;" +
                         "-fx-border-width: 2;" +
-                        "-fx-cursor: hand;"
-        );
+                        "-fx-cursor: hand;");
 
         setOnMouseEntered(e -> setStyle(
                 "-fx-background-color: #E3F2FD;" +
@@ -41,11 +40,8 @@ public class SecondaryButton extends Button {
                         "-fx-border-color: #2196F3;" +
                         "-fx-border-radius: 5;" +
                         "-fx-border-width: 2;" +
-                        "-fx-cursor: hand;"
-        ));
+                        "-fx-cursor: hand;"));
 
         setOnMouseExited(e -> applyStyles());
     }
 }
-
-

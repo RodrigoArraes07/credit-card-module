@@ -47,6 +47,7 @@ public class InvoiceView {
     public void createInvoice() {
         if (invoiceService == null) return;
 
+<<<<<<< HEAD
         InvoiceCreateDTO invoice = new InvoiceCreateDTO();
         invoice.setTotalAmount(Double.valueOf(totalAmountField.getText()));
         invoice.setClosingDate(closingDatePicker.getValue());
@@ -55,14 +56,21 @@ public class InvoiceView {
         // Preencha creditCard se necessário
 
         invoiceService.create(invoice);
+=======
+        // TODO: Implement with new service methods
+>>>>>>> 71fbe8b51cd048b1ea823f559aea7d679766ca6c
         refreshInvoiceList();
     }
 
     private void refreshInvoiceList() {
         if (invoiceService == null) return;
 
+<<<<<<< HEAD
         List<InvoiceDto> invoices = invoiceService.findAll();
 
         invoiceList.getItems().setAll(invoices);
+=======
+        // TODO: Implement with new service methods
+>>>>>>> 71fbe8b51cd048b1ea823f559aea7d679766ca6c
     }
 }

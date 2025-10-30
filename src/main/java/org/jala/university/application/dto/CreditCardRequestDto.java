@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.time.YearMonth;
 import java.util.UUID;
 
-
 @Data
 @Builder
 public class CreditCardRequestDto implements Serializable {

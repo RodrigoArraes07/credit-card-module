@@ -170,17 +170,21 @@ public class CreditCardRequestController {
 
     private void setFieldError(TextField field, boolean hasError) {
         if (hasError) {
-            field.setStyle("-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #f44336; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
+            field.setStyle(
+                    "-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #f44336; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
         } else {
-            field.setStyle("-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
+            field.setStyle(
+                    "-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
         }
     }
 
     private void setFieldError(PasswordField field, boolean hasError) {
         if (hasError) {
-            field.setStyle("-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #f44336; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
+            field.setStyle(
+                    "-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #f44336; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
         } else {
-            field.setStyle("-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
+            field.setStyle(
+                    "-fx-pref-height: 40; -fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-font-size: 14px;");
         }
     }
 
@@ -195,8 +199,7 @@ public class CreditCardRequestController {
         String successMessage = String.format(
                 "Cartão criado com sucesso!\nNúmero: %s\nLimite: %s",
                 response.getMaskCardNumber(),
-                formatCurrency(response.getApprovedLimit())
-        );
+                formatCurrency(response.getApprovedLimit()));
         showMessage(successMessage, "#4CAF50");
     }
 

@@ -27,15 +27,13 @@ public class InfoCard extends VBox {
         titleLabel.setStyle(
                 "-fx-font-size: 12px;" +
                         "-fx-text-fill: #666666;" +
-                        "-fx-font-weight: normal;"
-        );
+                        "-fx-font-weight: normal;");
 
         valueLabel = new Label();
         valueLabel.setStyle(
                 "-fx-font-size: 24px;" +
                         "-fx-text-fill: #2196F3;" +
-                        "-fx-font-weight: bold;"
-        );
+                        "-fx-font-weight: bold;");
 
         getChildren().addAll(titleLabel, valueLabel);
         setAlignment(Pos.CENTER);
@@ -46,8 +44,7 @@ public class InfoCard extends VBox {
                         "-fx-background-radius: 10;" +
                         "-fx-border-color: #e0e0e0;" +
                         "-fx-border-radius: 10;" +
-                        "-fx-border-width: 1;"
-        );
+                        "-fx-border-width: 1;");
     }
 
     public void setTitle(String title) {
@@ -62,7 +59,6 @@ public class InfoCard extends VBox {
         valueLabel.setStyle(
                 "-fx-font-size: 24px;" +
                         "-fx-text-fill: " + color + ";" +
-                        "-fx-font-weight: bold;"
-        );
+                        "-fx-font-weight: bold;");
     }
 }

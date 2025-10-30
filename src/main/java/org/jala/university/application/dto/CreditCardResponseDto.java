@@ -2,8 +2,6 @@ package org.jala.university.application.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 
@@ -14,8 +12,6 @@ import java.util.UUID;
 
 @Data
 @Builder
-@Getter
-@Setter
 public class CreditCardResponseDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -28,5 +24,4 @@ public class CreditCardResponseDto implements Serializable {
     private YearMonth expiration;
     private CreditCardStatus status;
     private String message;
-
 }

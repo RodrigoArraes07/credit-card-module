@@ -24,8 +24,7 @@ public class FormTextField extends TextField {
                         "-fx-border-radius: 5;" +
                         "-fx-background-radius: 5;" +
                         "-fx-padding: 10;" +
-                        "-fx-font-size: 14px;"
-        );
+                        "-fx-font-size: 14px;");
     }
 
     public void setError(boolean hasError) {
@@ -36,8 +35,7 @@ public class FormTextField extends TextField {
                             "-fx-border-radius: 5;" +
                             "-fx-background-radius: 5;" +
                             "-fx-padding: 10;" +
-                            "-fx-font-size: 14px;"
-            );
+                            "-fx-font-size: 14px;");
         } else {
             applyStyles();
         }

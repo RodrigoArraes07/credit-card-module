@@ -6,7 +6,7 @@
                                  https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
 
-    <persistence-unit name="loans_request" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="credit_card_module" transaction-type="RESOURCE_LOCAL">
         <!-- provider -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
