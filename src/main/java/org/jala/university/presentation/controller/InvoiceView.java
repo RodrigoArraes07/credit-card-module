@@ -45,21 +45,13 @@ public class InvoiceView {
     public void createInvoice() {
         if (invoiceService == null) return;
 
-        Invoice invoice = new Invoice();
-        invoice.setTotalAmount(Double.valueOf(totalAmountField.getText()));
-        invoice.setClosingDate(closingDatePicker.getValue());
-        invoice.setDueDate(dueDatePicker.getValue());
-        invoice.setIsPaid(paidCheckBox.isSelected());
-        // Preencha creditCard se necessário
-
-        invoiceService.createInvoice(invoice);
+        // TODO: Implement with new service methods
         refreshInvoiceList();
     }
 
     private void refreshInvoiceList() {
         if (invoiceService == null) return;
 
-        List<Invoice> invoices = invoiceService.getAllInvoices();
-        invoiceList.getItems().setAll(invoices);
+        // TODO: Implement with new service methods
     }
 }

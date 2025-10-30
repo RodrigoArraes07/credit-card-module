@@ -26,8 +26,8 @@ public final class CreditCard implements BaseEntity<UUID> {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID credit_card_id;
 
-    @Column(name = "card_number", unique = true, nullable = false)
-    private int cardNumber;
+    @Column(name = "card_number", unique = true, nullable = false, length = 16)
+    private String cardNumber;
 
     @Column(name = "mask_card_number", nullable = false)
     private String maskCardNumber;

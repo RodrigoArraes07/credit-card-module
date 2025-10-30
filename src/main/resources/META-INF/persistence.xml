@@ -5,22 +5,25 @@
                                  https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
 
-    <persistence-unit name="loans_request" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="credit_card_module" transaction-type="RESOURCE_LOCAL">
         <!-- provider -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- Domain -->
         <class>org.jala.university.domain.entity.User</class>
-        <class>org.jala.university.domain.entity.Account</class>
+        <class>org.jala.university.domain.entity.CreditCard</class>
+        <class>org.jala.university.domain.entity.Invoice</class>
+        <class>org.jala.university.domain.entity.Purchase</class>
+        <class>org.jala.university.domain.entity.PurchaseInstallment</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:test"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:creditcard;DB_CLOSE_DELAY=-1"/>
             <property name="jakarta.persistence.jdbc.user" value="admin"/>
             <property name="jakarta.persistence.jdbc.password" value="admin"/>
 
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
         </properties>
