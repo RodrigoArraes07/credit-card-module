@@ -17,6 +17,7 @@
         <!-- Entities -->
         <class>org.jala.university.domain.entity.CreditCard</class>
         <class>org.jala.university.domain.entity.Invoice</class>
+        <class>org.jala.university.domain.entity.User</class>
 
         <properties>
             <!-- Conexão com o MySQL -->
