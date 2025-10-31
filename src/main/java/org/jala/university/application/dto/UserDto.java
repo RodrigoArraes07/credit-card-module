@@ -7,6 +7,7 @@ import lombok.ToString;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * DTO utilizado para transferência de dados da entidade User.
@@ -23,6 +24,7 @@ public class UserDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private UUID id;
     private String name;
     private String email;
     private String cpf;

@@ -1,5 +1,6 @@
 package org.jala.university.presentation.controller;
 
+import jakarta.persistence.EntityManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,13 +9,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.dto.UserCreateDto;
+import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.CreditCardService;
+import org.jala.university.commons.presentation.BaseController;
+import org.jala.university.domain.entity.User;
 import org.jala.university.domain.enums.CreditCardStatus;
+import org.jala.university.infrastructure.config.AppConfig;
+import org.jala.university.infrastructure.persistence.UserRepositoryImpl;
 
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class CreditCardRequestController {
+public class CreditCardRequestController extends BaseController {
     @FXML
     private TextField nameField;
 
@@ -47,16 +54,28 @@ public class CreditCardRequestController {
 
     private CreditCardService creditCardService;
     private Double calculatedLimit;
+    private final UserRepositoryImpl userRepository;
 
     public CreditCardRequestController() {
+        AppConfig appConfig = AppConfig.getInstance();
+        EntityManager entityManager = appConfig.getEntityManager();
+        this.userRepository = new UserRepositoryImpl(entityManager);
     }
 
     public void setCreditCardService(CreditCardService service) {
         this.creditCardService = service;
     }
 
+
     @FXML
     private void initialize() {
+        UserCreateDto user = UserCreateDto.builder()
+                .name("AmauryMagno")
+                .email("Magno@gmail.com")
+                .cpf("00800254915")
+                .password_hash("123456")
+                .build();
+        userRepository.save(user);
     }
 
     @FXML
@@ -106,21 +125,43 @@ public class CreditCardRequestController {
             return;
         }
 
-        CreditCardRequestDto request = CreditCardRequestDto.builder()
-                .holderName(nameField.getText())
-                .cpf(cpfField.getText())
-                .email(emailField.getText())
-                .monthlyIncome(Double.parseDouble(incomeField.getText().replace(",", ".")))
-                .password(passwordField.getText())
-                .build();
+        try {
+            // Busca o usuário pelo CPF
+            User existingUser = userRepository.findByCpf(cpfField.getText());
 
-        CreditCardResponseDto response = creditCardService.requestCreditCard(request);
+            // Se o usuário não existir, mostra mensagem de erro
+            if (existingUser == null) {
+                showMessage("CPF não encontrado no sistema", "#f44336");
+                setFieldError(cpfField, true);
+                return;
+            }
 
-        if (response.getStatus() == CreditCardStatus.ACTIVE) {
-            showSuccessMessage(response);
-            clearForm();
-        } else {
-            showMessage(response.getMessage(), "#f44336");
+            // Verifica se os dados informados correspondem ao usuário existente
+            if (!existingUser.getName().equalsIgnoreCase(nameField.getText()) ||
+                    !existingUser.getEmail().equalsIgnoreCase(emailField.getText())) {
+                showMessage("Dados não correspondem ao usuário cadastrado", "#f44336");
+                return;
+            }
+
+            CreditCardRequestDto request = CreditCardRequestDto.builder()
+                    .holderName(existingUser.getName()) // Usa o nome do usuário existente
+                    .cpf(existingUser.getCpf())        // Usa o CPF do usuário existente
+                    .email(existingUser.getEmail())     // Usa o email do usuário existente
+                    .monthlyIncome(Double.parseDouble(incomeField.getText().replace(",", ".")))
+                    .password(passwordField.getText())
+                    .build();
+
+            CreditCardResponseDto response = creditCardService.requestCreditCard(request);
+
+            if (response.getStatus() == CreditCardStatus.ACTIVE) {
+                showSuccessMessage(response);
+                clearForm();
+            } else {
+                showMessage(response.getMessage(), "#f44336");
+            }
+        } catch (Exception e) {
+            showMessage("Erro ao processar a solicitação: " + e.getMessage(), "#f44336");
+            e.printStackTrace(); // Para debug
         }
     }
 

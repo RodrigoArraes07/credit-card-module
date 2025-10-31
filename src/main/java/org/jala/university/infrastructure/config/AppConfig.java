@@ -1,14 +1,17 @@
 package org.jala.university.infrastructure.config;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import org.h2.tools.Server;
 import org.jala.university.application.mapper.CreditCardMapper;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.CreditCardServiceImpl;
 import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.infrastructure.persistence.CreditCardRepositoryImpl;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class AppConfig {
 
@@ -17,33 +20,45 @@ public class AppConfig {
     private final EntityManager entityManager;
     private final CreditCardRepository creditCardRepository;
     private final CreditCardService creditCardService;
-    private Server h2WebServer;
 
     private AppConfig() {
-        startH2Console();
 
-        this.entityManagerFactory = Persistence.createEntityManagerFactory("credit_card_module");
+        Dotenv dotenv = Dotenv.load();
+
+        String host = dotenv.get("DB_HOST");
+        String port = dotenv.get("DB_PORT");
+        String name = dotenv.get("DB_NAME");
+        String user = dotenv.get("DB_USER");
+        String pass = dotenv.get("DB_PASSWORD");
+
+        System.out.println("DB_HOST: " + host);
+        System.out.println("DB_PORT: " + port);
+        System.out.println("DB_NAME: " + name);
+        System.out.println("DB_USER: " + user);
+        System.out.println("DB_PASSWORD: " + pass);
+
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + name;
+
+        System.out.println("url: " + url);
+        // Configura o EntityManagerFactory dinamicamente com base nas variáveis de ambiente
+        Map<String, String> props = new HashMap<>();
+
+        props.put("jakarta.persistence.jdbc.driver", "com.mysql.cj.jdbc.Driver");
+        props.put("jakarta.persistence.jdbc.url", url);
+        props.put("jakarta.persistence.jdbc.user", user);
+        props.put("jakarta.persistence.jdbc.password", pass);
+        props.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
+        props.put("hibernate.hbm2ddl.auto", "update");
+        props.put("hibernate.show_sql", "true");
+        props.put("hibernate.format_sql", "true");
+
+        this.entityManagerFactory = Persistence.createEntityManagerFactory("credit_card_module", props);
         this.entityManager = entityManagerFactory.createEntityManager();
         this.creditCardRepository = new CreditCardRepositoryImpl(entityManager);
         this.creditCardService = new CreditCardServiceImpl(
                 creditCardRepository,
                 CreditCardMapper.getInstance()
         );
-    }
-
-    private void startH2Console() {
-        try {
-            h2WebServer = Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8082");
-            h2WebServer.start();
-            System.out.println("========================================");
-            System.out.println("H2 Console disponível em: http://localhost:8082");
-            System.out.println("JDBC URL: jdbc:h2:mem:creditcard");
-            System.out.println("User: admin");
-            System.out.println("Password: admin");
-            System.out.println("========================================");
-        } catch (Exception e) {
-            System.err.println("Erro ao iniciar H2 Console: " + e.getMessage());
-        }
     }
 
     public static AppConfig getInstance() {
@@ -71,10 +86,6 @@ public class AppConfig {
         }
         if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
             entityManagerFactory.close();
-        }
-        if (h2WebServer != null && h2WebServer.isRunning(false)) {
-            h2WebServer.stop();
-            System.out.println("H2 Console encerrado");
         }
     }
 }

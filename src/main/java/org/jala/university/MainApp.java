@@ -13,10 +13,6 @@ public final class MainApp extends Application {
 
     private static final String APPLICATION_TITLE = "Credit Card Module - Solicitar Cartão";
 
-    static {
-        EnvConfig.load();
-    }
-
     public static void main(String[] args) {
         launch(args);
     }

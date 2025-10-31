@@ -25,7 +25,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public InvoiceCreateDTO create(InvoiceCreateDTO invoiceDto) {
+    public Invoice create(InvoiceCreateDTO invoiceDto) {
         return null;
     }
 
