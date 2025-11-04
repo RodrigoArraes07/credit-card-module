@@ -5,10 +5,17 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.jala.university.application.mapper.CreditCardMapper;
+import org.jala.university.application.mapper.InvoiceMapper;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.CreditCardServiceImpl;
+import org.jala.university.application.service.InvoiceService;
+import org.jala.university.application.service.InvoiceServiceImpl;
 import org.jala.university.domain.repository.CreditCardRepository;
+import org.jala.university.domain.repository.InvoiceRepository;
+import org.jala.university.domain.repository.PurchaseRepository;
 import org.jala.university.infrastructure.persistence.CreditCardRepositoryImpl;
+import org.jala.university.infrastructure.persistence.InvoiceRepositoryImpl;
+import org.jala.university.infrastructure.persistence.PurchaseRepositoryImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +26,10 @@ public class AppConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final EntityManager entityManager;
     private final CreditCardRepository creditCardRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final PurchaseRepository purchaseRepository;
     private final CreditCardService creditCardService;
+    private final InvoiceService invoiceService;
 
     private AppConfig() {
 
@@ -55,9 +65,15 @@ public class AppConfig {
         this.entityManagerFactory = Persistence.createEntityManagerFactory("credit_card_module", props);
         this.entityManager = entityManagerFactory.createEntityManager();
         this.creditCardRepository = new CreditCardRepositoryImpl(entityManager);
+        this.invoiceRepository = new InvoiceRepositoryImpl(entityManager);
+        this.purchaseRepository = new PurchaseRepositoryImpl(entityManager);
         this.creditCardService = new CreditCardServiceImpl(
                 creditCardRepository,
                 CreditCardMapper.getInstance()
+        );
+        this.invoiceService = new InvoiceServiceImpl(
+                invoiceRepository,
+                InvoiceMapper.getInstance()
         );
     }
 
@@ -76,8 +92,20 @@ public class AppConfig {
         return creditCardRepository;
     }
 
+    public InvoiceRepository getInvoiceRepository() {
+        return invoiceRepository;
+    }
+
+    public PurchaseRepository getPurchaseRepository() {
+        return purchaseRepository;
+    }
+
     public CreditCardService getCreditCardService() {
         return creditCardService;
+    }
+
+    public InvoiceService getInvoiceService() {
+        return invoiceService;
     }
 
     public void close() {

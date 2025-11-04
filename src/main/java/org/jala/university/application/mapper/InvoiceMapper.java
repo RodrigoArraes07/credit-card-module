@@ -57,4 +57,30 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
                 .isPaid(input.getIsPaid())
                 .build();
     }
+
+    public InvoiceDto toDto(Invoice input) {
+        if (input == null) {
+            return null;
+        }
+        return InvoiceDto.builder()
+                .id(input.getId())
+                .closingDate(input.getClosingDate())
+                .dueDate(input.getDueDate())
+                .totalAmount(input.getTotalAmount())
+                .isPaid(input.getIsPaid())
+                .build();
+    }
+
+    public Invoice fromDto(InvoiceDto input) {
+        if (input == null) {
+            return null;
+        }
+        return Invoice.builder()
+                .id(input.getId())
+                .closingDate(input.getClosingDate())
+                .dueDate(input.getDueDate())
+                .totalAmount(input.getTotalAmount())
+                .isPaid(input.getIsPaid())
+                .build();
+    }
 }

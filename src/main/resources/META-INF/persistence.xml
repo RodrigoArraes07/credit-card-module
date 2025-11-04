@@ -18,6 +18,8 @@
         <class>org.jala.university.domain.entity.CreditCard</class>
         <class>org.jala.university.domain.entity.Invoice</class>
         <class>org.jala.university.domain.entity.User</class>
+        <class>org.jala.university.domain.entity.Purchase</class>
+        <class>org.jala.university.domain.entity.PurchaseInstallment</class>
 
         <properties>
             <!-- Conexão com o MySQL -->
