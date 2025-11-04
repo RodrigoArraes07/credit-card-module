@@ -1,2 +1,6 @@
 /target
 /.idea
+/.claude
+/CLAUDE.md
+.env
+src/main/java/org/jala/university/env
