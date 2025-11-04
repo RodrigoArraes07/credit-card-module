@@ -1,22 +1,141 @@
 package org.jala.university.application.service;
 
-import org.jala.university.application.dto.SampleEntityDto;
-import org.jala.university.application.mapper.SampleEntityMapper;
-import org.jala.university.domain.entity.SampleEntity;
-import org.jala.university.domain.repository.SampleEntityRepository;
+import lombok.AllArgsConstructor;
+import org.jala.university.application.dto.CreditCardDto;
+import org.jala.university.application.dto.CreditCardRequestDto;
+import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.dto.CreditCardRequestDto;
+import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.mapper.CreditCardMapper;
+import org.jala.university.domain.entity.CreditCard;
+import org.jala.university.domain.enums.CreditCardStatus;
+import org.jala.university.domain.enums.TargetType;
+import org.jala.university.domain.enums.CreditCardStatus;
+import org.jala.university.domain.enums.TargetType;
+import org.jala.university.domain.repository.CreditCardRepository;
 
-public final class CreditCardServiceImpl implements CreditCardService {
-    private final SampleEntityRepository sampleEntityRepository;
-    private final SampleEntityMapper sampleEntityMapper;
+import java.time.YearMonth;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Random;
+import java.util.Random;
+import java.util.UUID;
 
-    public CreditCardServiceImpl(SampleEntityRepository sampleEntityRepository, SampleEntityMapper sampleEntityMapper) {
-        this.sampleEntityRepository = sampleEntityRepository;
-        this.sampleEntityMapper = sampleEntityMapper;
-    }
-    // Here should be added all the functionality to handle the business logic
+@AllArgsConstructor
+public class CreditCardServiceImpl implements CreditCardService {
+    private CreditCardRepository creditCardRepository;
+    private CreditCardMapper creditCardMapper;
+
     @Override
-    public SampleEntityDto doSomething(SampleEntityDto sampleEntityDto) {
-        SampleEntity saved = sampleEntityRepository.save(sampleEntityMapper.mapFrom(sampleEntityDto));
-        return sampleEntityMapper.mapTo(saved);
+    public List<CreditCardDto> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public CreditCardDto findById(UUID id) {
+        return null;
+    }
+
+    @Override
+    public CreditCardDto create(CreditCard creditCard) {
+        return null;
+    }
+
+    @Override
+    public CreditCardDto update(UUID id, CreditCard creditCard) {
+        return null;
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        // TODO: implements
+    }
+
+    @Override
+    public CreditCardResponseDto requestCreditCard(CreditCardRequestDto request) {
+        try {
+            if (!isValidRequest(request)) {
+                return buildErrorResponse("Dados inválidos. Verifique as informações.");
+            }
+
+            Double approvedLimit = calculatePreApprovedLimit(request.getMonthlyIncome());
+
+            String cardNumber = generateCardNumber();
+            String maskedNumber = maskCardNumber(cardNumber);
+            int cvv = generateCVV();
+            YearMonth expiration = YearMonth.now().plusYears(5);
+            TargetType targetType = TargetType.Visa;
+
+            CreditCard creditCard = CreditCard.builder()
+                    .cardNumber(cardNumber)
+                    .maskCardNumber(maskedNumber)
+                    .limitAmount(approvedLimit)
+                    .targetType(targetType)
+                    .cvc(cvv)
+                    .expiration(expiration)
+                    .passwordHash(request.getPassword())
+                    .status(CreditCardStatus.ACTIVE)
+                    .build();
+
+            CreditCard saved = creditCardRepository.save(creditCard);
+
+            return CreditCardResponseDto.builder()
+                    .creditCardId(saved.getCredit_card_id())
+                    .maskCardNumber(maskedNumber)
+                    .holderName(request.getHolderName())
+                    .approvedLimit(approvedLimit)
+                    .targetType(targetType)
+                    .expiration(expiration)
+                    .status(CreditCardStatus.ACTIVE)
+                    .message("Cartão criado com sucesso!")
+                    .build();
+
+        } catch (Exception e) {
+            return buildErrorResponse("Erro ao processar solicitação: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Double calculatePreApprovedLimit(Double monthlyIncome) {
+        if (monthlyIncome == null || monthlyIncome < 0) {
+            return 0.0;
+        }
+        if (monthlyIncome < 1000) {
+            return 500.0;
+        }
+        return monthlyIncome * 2.5;
+    }
+
+    private boolean isValidRequest(CreditCardRequestDto request) {
+        return request.getHolderName() != null && !request.getHolderName().isBlank()
+                && request.getCpf() != null && !request.getCpf().isBlank()
+                && request.getMonthlyIncome() != null && request.getMonthlyIncome() > 0
+                && request.getEmail() != null && !request.getEmail().isBlank()
+                && request.getPassword() != null && request.getPassword().length() == 4;
+    }
+
+    private String generateCardNumber() {
+        Random random = new Random();
+        StringBuilder number = new StringBuilder("4");
+        for (int i = 0; i < 15; i++) {
+            number.append(random.nextInt(10));
+        }
+        return number.toString();
+    }
+
+    private String maskCardNumber(String cardNumber) {
+        return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
+    }
+
+    private int generateCVV() {
+        Random random = new Random();
+        return random.nextInt(900) + 100;
+    }
+
+    private CreditCardResponseDto buildErrorResponse(String message) {
+        return CreditCardResponseDto.builder()
+                .message(message)
+                .status(CreditCardStatus.BLOCKED)
+                .build();
     }
 }

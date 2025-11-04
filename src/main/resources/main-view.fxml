@@ -36,9 +36,13 @@
 <?import javafx.scene.layout.Pane?>
 
 
-<Pane prefHeight="320.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.jala.university.presentation.controller.MainViewController">
-   <children>
-      <Label layoutX="102.0" layoutY="152.0" text="Credit Card Module View" />
-      <Label layoutX="26.0" layoutY="209.0" text="Add here all the UI components using Scene Builder..." />
-   </children>
+<Pane prefHeight="320.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.jala.university.presentation.controller.MainViewController">
+    <children>
+        <Label layoutX="102.0" layoutY="152.0" text="Credit Card Module View"/>
+        <Label layoutX="26.0" layoutY="209.0" text="Add here all the UI components using Scene Builder..."/>
+        <fx:include source="invoice-view.fxml"/>
+    </children>
 </Pane>
+
