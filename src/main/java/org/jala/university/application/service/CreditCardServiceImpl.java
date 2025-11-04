@@ -163,6 +163,10 @@ public class CreditCardServiceImpl implements CreditCardService {
                 return buildUpdateErrorResponse("Cartão não encontrado.");
             }
 
+            if (updateDto.getPassword() == null || !creditCard.getPasswordHash().equals(updateDto.getPassword())) {
+                return buildUpdateErrorResponse("Senha incorreta.");
+            }
+
             boolean limitUpdated = false;
             boolean dueDateUpdated = false;
             int affectedInvoices = 0;

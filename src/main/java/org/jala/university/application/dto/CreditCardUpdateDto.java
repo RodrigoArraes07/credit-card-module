@@ -13,4 +13,5 @@ public class CreditCardUpdateDto {
     private String cardNumber;
     private Double newLimitAmount;
     private Integer newDueDay;
+    private String password;
 }
