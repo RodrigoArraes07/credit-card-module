@@ -11,8 +11,10 @@ import org.jala.university.application.service.CreditCardServiceImpl;
 import org.jala.university.application.service.UserService;
 import org.jala.university.application.service.UserServiceImpl;
 import org.jala.university.domain.repository.CreditCardRepository;
+import org.jala.university.domain.repository.InvoiceRepository;
 import org.jala.university.domain.repository.UserRepository;
 import org.jala.university.infrastructure.persistence.CreditCardRepositoryImpl;
+import org.jala.university.infrastructure.persistence.InvoiceRepositoryImpl;
 import org.jala.university.infrastructure.persistence.UserRepositoryImpl;
 
 import java.util.HashMap;
@@ -24,6 +26,7 @@ public class AppConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final EntityManager entityManager;
     private final CreditCardRepository creditCardRepository;
+    private final InvoiceRepository invoiceRepository;
     private final CreditCardService creditCardService;
     private final UserRepository userRepository;
     private final UserService userService;
@@ -47,7 +50,6 @@ public class AppConfig {
         String url = "jdbc:mysql://" + host + ":" + port + "/" + name;
 
         System.out.println("url: " + url);
-        // Configura o EntityManagerFactory dinamicamente com base nas variáveis de ambiente
         Map<String, String> props = new HashMap<>();
 
         props.put("jakarta.persistence.jdbc.driver", "com.mysql.cj.jdbc.Driver");
@@ -62,10 +64,12 @@ public class AppConfig {
         this.entityManagerFactory = Persistence.createEntityManagerFactory("credit_card_module", props);
         this.entityManager = entityManagerFactory.createEntityManager();
         this.creditCardRepository = new CreditCardRepositoryImpl(entityManager);
+        this.invoiceRepository = new InvoiceRepositoryImpl(entityManager);
         this.userRepository = new UserRepositoryImpl(entityManager);
         this.creditCardService = new CreditCardServiceImpl(
                 creditCardRepository,
-                CreditCardMapper.getInstance()
+                CreditCardMapper.getInstance(),
+                invoiceRepository
         );
         this.userService = new UserServiceImpl(
                 userRepository,
