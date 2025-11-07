@@ -4,11 +4,8 @@ import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.domain.entity.Invoice;
-import org.jala.university.domain.repository.InvoiceRepository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor

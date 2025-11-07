@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import org.jala.university.application.dto.UserCreateDto;
-import org.jala.university.application.dto.UserDto;
 import org.jala.university.commons.infrastructure.persistance.CrudRepository;
 import org.jala.university.domain.entity.User;
 import org.jala.university.domain.repository.UserRepository;

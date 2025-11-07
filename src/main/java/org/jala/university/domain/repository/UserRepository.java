@@ -1,7 +1,6 @@
 package org.jala.university.domain.repository;
 
 import org.jala.university.application.dto.UserCreateDto;
-import org.jala.university.application.dto.UserDto;
 import org.jala.university.commons.domain.repository.Repository;
 import org.jala.university.domain.entity.User;
 

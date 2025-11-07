@@ -1,10 +1,8 @@
 package org.jala.university.application.mapper;
 
 import org.jala.university.application.dto.CreditCardDto;
-import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.commons.application.mapper.Mapper;
 import org.jala.university.domain.entity.CreditCard;
-import org.jala.university.domain.entity.Invoice;
 
 public class CreditCardMapper implements Mapper<CreditCard, CreditCardDto> {
     /**

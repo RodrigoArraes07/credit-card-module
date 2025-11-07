@@ -1,10 +1,7 @@
 package org.jala.university.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.*;
-import lombok.NoArgsConstructor;
 import org.jala.university.commons.domain.entity.BaseEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;

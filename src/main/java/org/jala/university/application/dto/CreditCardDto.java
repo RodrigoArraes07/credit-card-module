@@ -6,7 +6,6 @@ import org.jala.university.domain.enums.TargetType;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.YearMonth;
 import java.util.UUID;
 
 @Builder
