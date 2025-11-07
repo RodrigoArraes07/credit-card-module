@@ -92,7 +92,7 @@
         </HBox>
 
         <Label fx:id="messageLabel"
-               text=""
+               text=" "
                style="-fx-font-size: 14px; -fx-font-weight: bold;"
                alignment="CENTER"
                visible="false"

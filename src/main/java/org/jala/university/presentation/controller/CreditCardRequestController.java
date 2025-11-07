@@ -10,7 +10,6 @@ import javafx.scene.layout.VBox;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.dto.UserCreateDto;
-import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.domain.entity.User;

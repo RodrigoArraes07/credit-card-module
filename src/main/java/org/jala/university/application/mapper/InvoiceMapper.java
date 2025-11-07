@@ -3,12 +3,11 @@ package org.jala.university.application.mapper;
 import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.commons.application.mapper.Mapper;
 import org.jala.university.domain.entity.Invoice;
-import org.jala.university.application.dto.InvoiceDto;
 
 /**
  * InvoiceMapper é uma classe utilitária responsável por converter objetos do tipo Invoice (entidade)
  * em InvoiceDto (DTO) e vice-versa, centralizando a lógica de transformação dos dados.
- *
+ * <p>
  * Esse mapper garante que apenas as informações adequadas sejam repassadas para o DTO,
  * como, por exemplo, o mascaramento do número completo do cartão de crédito, que não é para ser visivel para o usuario.
  *

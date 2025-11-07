@@ -8,7 +8,6 @@ import javafx.scene.control.TextField;
 import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.application.service.InvoiceService;
-import org.jala.university.domain.entity.Invoice;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

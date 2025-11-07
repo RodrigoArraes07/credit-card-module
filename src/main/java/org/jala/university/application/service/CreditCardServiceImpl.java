@@ -4,20 +4,14 @@ import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
-import org.jala.university.application.dto.CreditCardRequestDto;
-import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.mapper.CreditCardMapper;
 import org.jala.university.domain.entity.CreditCard;
-import org.jala.university.domain.enums.CreditCardStatus;
-import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.repository.CreditCardRepository;
 
 import java.time.YearMonth;
-import java.time.YearMonth;
 import java.util.List;
-import java.util.Random;
 import java.util.Random;
 import java.util.UUID;
 
@@ -64,7 +58,7 @@ public class CreditCardServiceImpl implements CreditCardService {
             String maskedNumber = maskCardNumber(cardNumber);
             int cvv = generateCVV();
             YearMonth expiration = YearMonth.now().plusYears(5);
-            TargetType targetType = TargetType.Visa;
+            TargetType targetType = TargetType.VISA;
 
             CreditCard creditCard = CreditCard.builder()
                     .cardNumber(cardNumber)

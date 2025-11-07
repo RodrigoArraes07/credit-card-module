@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jala.university.infrastructure.config.AppConfig;
-import org.jala.university.infrastructure.config.EnvConfig;
 import org.jala.university.presentation.controller.CreditCardRequestController;
 
 public final class MainApp extends Application {
