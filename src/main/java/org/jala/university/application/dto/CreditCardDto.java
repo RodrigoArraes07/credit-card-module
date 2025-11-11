@@ -24,4 +24,6 @@ public class CreditCardDto implements Serializable {
     private TargetType targetType;
     private Integer cvc;
     private CreditCardStatus status;
+    private String message;
+
 }

@@ -18,4 +18,10 @@ public interface CreditCardService {
     void deleteById(UUID id);
     CreditCardResponseDto requestCreditCard(CreditCardRequestDto request, User user);
     Double calculatePreApprovedLimit(Double monthlyIncome);
+    boolean blockCard(UUID cardId, UUID userId);
+    boolean unblockCard(UUID cardId, UUID userId);
+    boolean cancelCard(UUID cardId, UUID userId);
+    CreditCardDto blockCardWithMessage(UUID cardId, UUID userId);
+    CreditCardDto unblockCardWithMessage(UUID cardId, UUID userId);
+    CreditCardDto cancelCardWithMessage(UUID cardId, UUID userId);
 }

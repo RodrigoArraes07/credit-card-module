@@ -117,6 +117,36 @@ public class CreditCardServiceImpl implements CreditCardService {
         return monthlyIncome * 2.5;
     }
 
+    /**
+     * @param cardId 
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean blockCard(UUID cardId, UUID userId) {
+        return false;
+    }
+
+    /**
+     * @param cardId 
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean unblockCard(UUID cardId, UUID userId) {
+        return false;
+    }
+
+    /**
+     * @param cardId 
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean cancelCard(UUID cardId, UUID userId) {
+        return false;
+    }
+
     private boolean isValidRequest(CreditCardRequestDto request) {
         return request.getHolderName() != null && !request.getHolderName().isBlank()
                 && request.getCpf() != null && !request.getCpf().isBlank()
@@ -142,6 +172,69 @@ public class CreditCardServiceImpl implements CreditCardService {
         Random random = new Random();
         return random.nextInt(900) + 100;
     }
+    @Override
+    public CreditCardDto blockCardWithMessage(UUID cardId, UUID userId) {
+        CreditCard card = creditCardRepository.findById(cardId);
+        if (card == null) {
+            return buildCreditCardDto(null, "Cartão não encontrado.");
+        }
+        if (!card.getUser().getId().equals(userId)) {
+            return buildCreditCardDto(card, "Usuário não autorizado.");
+        }
+        if (card.getStatus() == CreditCardStatus.BLOCKED) {
+            return buildCreditCardDto(card, "Cartão já está bloqueado.");
+        }
+        card.setStatus(CreditCardStatus.BLOCKED);
+        creditCardRepository.save(card);
+        return buildCreditCardDto(card, "Cartão bloqueado com sucesso.");
+    }
+
+    @Override
+    public CreditCardDto unblockCardWithMessage(UUID cardId, UUID userId) {
+        CreditCard card = creditCardRepository.findById(cardId);
+        if (card == null) {
+            return buildCreditCardDto(null, "Cartão não encontrado.");
+        }
+        if (!card.getUser().getId().equals(userId)) {
+            return buildCreditCardDto(card, "Usuário não autorizado.");
+        }
+        if (card.getStatus() != CreditCardStatus.BLOCKED) {
+            return buildCreditCardDto(card, "O cartão não está bloqueado.");
+        }
+        card.setStatus(CreditCardStatus.ACTIVE);
+        creditCardRepository.save(card);
+        return buildCreditCardDto(card, "Cartão desbloqueado com sucesso.");
+    }
+
+    @Override
+    public CreditCardDto cancelCardWithMessage(UUID cardId, UUID userId) {
+        CreditCard card = creditCardRepository.findById(cardId);
+        if (card == null) {
+            return buildCreditCardDto(null, "Cartão não encontrado.");
+        }
+        if (!card.getUser().getId().equals(userId)) {
+            return buildCreditCardDto(card, "Usuário não autorizado.");
+        }
+        if (card.getStatus() == CreditCardStatus.CANCELED) {
+            return buildCreditCardDto(card, "Cartão já está cancelado.");
+        }
+        card.setStatus(CreditCardStatus.CANCELED);
+        creditCardRepository.save(card);
+        return buildCreditCardDto(card, "Cartão cancelado com sucesso.");
+    }
+
+    private CreditCardDto buildCreditCardDto(CreditCard card, String message) {
+        if (card == null) {
+            return CreditCardDto.builder()
+                    .message(message)
+                    .build();
+        }
+        CreditCardDto dto = creditCardMapper.toDto(card);
+        dto.setMessage(message);
+        return dto;
+    }
+
+
 
     private CreditCardResponseDto buildErrorResponse(String message) {
         return CreditCardResponseDto.builder()

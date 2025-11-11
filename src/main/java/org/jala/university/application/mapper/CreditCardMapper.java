@@ -49,4 +49,18 @@ public class CreditCardMapper implements Mapper<CreditCard, CreditCardDto> {
                 .cvc(input.getCvc())
                 .build();
     }
+
+    public CreditCardDto toDto(CreditCard creditCard) {
+        if (creditCard == null) {
+            return null;
+        }
+        String message = "";
+        return CreditCardDto.builder()
+                .cardNumber(creditCard.getCardNumber())
+                .limitAmount(creditCard.getLimitAmount())
+                .status(creditCard.getStatus())
+                .message(message)
+                .build();
+    }
+
 }
