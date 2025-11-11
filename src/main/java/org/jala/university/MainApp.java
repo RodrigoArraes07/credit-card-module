@@ -25,7 +25,7 @@ public final class MainApp extends Application {
             System.out.println("AppConfig criado");
 
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/credit-card-request-view.fxml")
+                    getClass().getResource("/credit-card-request-view.fxml")
             );
             System.out.println("FXMLLoader criado");
 

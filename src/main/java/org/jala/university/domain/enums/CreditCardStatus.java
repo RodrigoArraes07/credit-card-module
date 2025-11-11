@@ -4,5 +4,6 @@ public enum CreditCardStatus {
     ACTIVE,
     BLOCKED,
     SUSPENDED,
-    EXPIRED;
+    EXPIRED,
+    CANCELED
 }

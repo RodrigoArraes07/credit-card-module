@@ -57,7 +57,7 @@ public class UserRepositoryImpl
                 throw new IllegalStateException("Já existe um usuário cadastrado com este CPF");
             }
 
-            em.persist(user);
+            em.merge(user);
             em.flush(); // Força o flush para garantir que o ID seja gerado
 
             return user;
@@ -65,5 +65,6 @@ public class UserRepositoryImpl
             throw new RuntimeException("Erro ao salvar usuário: " + e.getMessage(), e);
         }
     }
+
 
 }
