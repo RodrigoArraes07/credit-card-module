@@ -4,3 +4,4 @@
 /CLAUDE.md
 .env
 src/main/java/org/jala/university/env
+.claude/

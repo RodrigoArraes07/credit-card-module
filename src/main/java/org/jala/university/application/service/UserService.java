@@ -13,4 +13,5 @@ public interface UserService {
     UserDto update(UUID id, UserDto userDto);
     void deleteById(UUID id);
     UserDto findByCpf(String cpf);
+    UserDto authenticate(String cpf, String password);
 }

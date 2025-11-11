@@ -20,6 +20,7 @@ public class CreditCardDto implements Serializable {
     private UUID credit_card_id;
     private String cardNumber;
     private String maskCardNumber;
+    private String holderName;
     private Double limitAmount;
     private TargetType targetType;
     private Integer cvc;

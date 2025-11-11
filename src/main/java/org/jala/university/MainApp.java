@@ -3,15 +3,17 @@ package org.jala.university;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
-import org.jala.university.infrastructure.config.EnvConfig;
-import org.jala.university.presentation.controller.CreditCardRequestController;
+import org.jala.university.presentation.controller.LoginController;
 
 public final class MainApp extends Application {
 
-    private static final String APPLICATION_TITLE = "Credit Card Module - Solicitar Cartão";
+    private static final String APPLICATION_TITLE = "JALA Credit Card Management";
+    private static final int WINDOW_WIDTH = 1000;
+    private static final int WINDOW_HEIGHT = 700;
 
     public static void main(String[] args) {
         launch(args);
@@ -20,33 +22,31 @@ public final class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            System.out.println("Iniciando aplicação...");
+            System.out.println("Starting application...");
 
             AppConfig config = AppConfig.getInstance();
-            System.out.println("AppConfig criado");
+
+            Scene scene = new Scene(new Pane(), WINDOW_WIDTH, WINDOW_HEIGHT);
+            ViewSwitcher.setup(primaryStage, scene);
 
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/credit-card-request-view.fxml")
+                getClass().getResource("/login-view.fxml")
             );
-            System.out.println("FXMLLoader criado");
+            Pane root = loader.load();
 
-            VBox root = loader.load();
-            System.out.println("FXML carregado");
+            LoginController controller = loader.getController();
+            controller.setUserService(config.getUserService());
 
-            CreditCardRequestController controller = loader.getController();
-            controller.setCreditCardService(config.getCreditCardService());
-            System.out.println("Service injetado no controller");
-
-            Scene scene = new Scene(root, 600, 700);
+            scene.setRoot(root);
             primaryStage.setScene(scene);
             primaryStage.setTitle(APPLICATION_TITLE);
             primaryStage.setOnCloseRequest(e -> config.close());
             primaryStage.show();
 
-            System.out.println("Aplicação iniciada com sucesso!");
+            System.out.println("Application started successfully!");
 
         } catch (Exception e) {
-            System.err.println("ERRO ao iniciar aplicação:");
+            System.err.println("ERROR starting application:");
             e.printStackTrace();
         }
     }
