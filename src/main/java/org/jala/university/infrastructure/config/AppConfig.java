@@ -6,16 +6,21 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.jala.university.application.mapper.CreditCardMapper;
 import org.jala.university.application.mapper.InvoiceMapper;
+import org.jala.university.application.mapper.UserMapper;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.CreditCardServiceImpl;
 import org.jala.university.application.service.InvoiceService;
 import org.jala.university.application.service.InvoiceServiceImpl;
+import org.jala.university.application.service.UserService;
+import org.jala.university.application.service.UserServiceImpl;
 import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.domain.repository.InvoiceRepository;
 import org.jala.university.domain.repository.PurchaseRepository;
+import org.jala.university.domain.repository.UserRepository;
 import org.jala.university.infrastructure.persistence.CreditCardRepositoryImpl;
 import org.jala.university.infrastructure.persistence.InvoiceRepositoryImpl;
 import org.jala.university.infrastructure.persistence.PurchaseRepositoryImpl;
+import org.jala.university.infrastructure.persistence.UserRepositoryImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +33,10 @@ public class AppConfig {
     private final CreditCardRepository creditCardRepository;
     private final InvoiceRepository invoiceRepository;
     private final PurchaseRepository purchaseRepository;
+    private final UserRepository userRepository;
     private final CreditCardService creditCardService;
     private final InvoiceService invoiceService;
+    private final UserService userService;
 
     private AppConfig() {
 
@@ -67,6 +74,7 @@ public class AppConfig {
         this.creditCardRepository = new CreditCardRepositoryImpl(entityManager);
         this.invoiceRepository = new InvoiceRepositoryImpl(entityManager);
         this.purchaseRepository = new PurchaseRepositoryImpl(entityManager);
+        this.userRepository = new UserRepositoryImpl(entityManager);
         this.creditCardService = new CreditCardServiceImpl(
                 creditCardRepository,
                 CreditCardMapper.getInstance()
@@ -74,6 +82,10 @@ public class AppConfig {
         this.invoiceService = new InvoiceServiceImpl(
                 invoiceRepository,
                 InvoiceMapper.getInstance()
+        );
+        this.userService = new UserServiceImpl(
+                userRepository,
+                UserMapper.getInstance()
         );
     }
 
@@ -106,6 +118,14 @@ public class AppConfig {
 
     public InvoiceService getInvoiceService() {
         return invoiceService;
+    }
+
+    public UserRepository getUserRepository() {
+        return userRepository;
+    }
+
+    public UserService getUserService() {
+        return userService;
     }
 
     public void close() {

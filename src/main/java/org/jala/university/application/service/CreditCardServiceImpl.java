@@ -4,20 +4,15 @@ import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
-import org.jala.university.application.dto.CreditCardRequestDto;
-import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.mapper.CreditCardMapper;
 import org.jala.university.domain.entity.CreditCard;
-import org.jala.university.domain.enums.CreditCardStatus;
-import org.jala.university.domain.enums.TargetType;
+import org.jala.university.domain.entity.User;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.repository.CreditCardRepository;
 
 import java.time.YearMonth;
-import java.time.YearMonth;
 import java.util.List;
-import java.util.Random;
 import java.util.Random;
 import java.util.UUID;
 
@@ -29,6 +24,14 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Override
     public List<CreditCardDto> findAll() {
         return List.of();
+    }
+
+    @Override
+    public List<CreditCardDto> findByUserId(UUID userId) {
+        List<CreditCard> cards = creditCardRepository.findByUserId(userId);
+        return cards.stream()
+                .map(creditCardMapper::mapTo)
+                .toList();
     }
 
     @Override
@@ -52,10 +55,14 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCardResponseDto requestCreditCard(CreditCardRequestDto request) {
+    public CreditCardResponseDto requestCreditCard(CreditCardRequestDto request, User user) {
         try {
             if (!isValidRequest(request)) {
                 return buildErrorResponse("Dados inválidos. Verifique as informações.");
+            }
+
+            if (user == null) {
+                return buildErrorResponse("Usuário não encontrado.");
             }
 
             Double approvedLimit = calculatePreApprovedLimit(request.getMonthlyIncome());
@@ -69,12 +76,16 @@ public class CreditCardServiceImpl implements CreditCardService {
             CreditCard creditCard = CreditCard.builder()
                     .cardNumber(cardNumber)
                     .maskCardNumber(maskedNumber)
+                    .holderName(request.getHolderName())
                     .limitAmount(approvedLimit)
+                    .maxLimit(approvedLimit)
                     .targetType(targetType)
+                    .cardType(request.getCardType())
                     .cvc(cvv)
                     .expiration(expiration)
                     .passwordHash(request.getPassword())
                     .status(CreditCardStatus.ACTIVE)
+                    .user(user)
                     .build();
 
             CreditCard saved = creditCardRepository.save(creditCard);

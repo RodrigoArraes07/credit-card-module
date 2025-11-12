@@ -34,6 +34,7 @@ public class UserMapper implements Mapper<User, UserDto> {
     public UserDto mapTo(User user) {
         if (user == null) return null;
         return UserDto.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .cpf(user.getCpf())

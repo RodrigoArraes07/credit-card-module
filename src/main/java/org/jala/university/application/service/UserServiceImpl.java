@@ -6,6 +6,7 @@ import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.mapper.UserMapper;
 import org.jala.university.domain.entity.User;
 import org.jala.university.domain.repository.UserRepository;
+import org.jala.university.infrastructure.util.PasswordHashUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findById(UUID id) {
-        return null;
+        User user = userRepository.findById(id);
+        return user != null ? userMapper.mapTo(user) : null;
     }
 
     @Override
@@ -55,5 +57,20 @@ public class UserServiceImpl implements UserService {
     public UserDto findByCpf(String cpf) {
         User user = userRepository.findByCpf(cpf);
         return user != null ? userMapper.mapTo(user) : null;
+    }
+
+    @Override
+    public UserDto authenticate(String cpf, String password) {
+        User user = userRepository.findByCpf(cpf);
+
+        if (user == null) {
+            return null;
+        }
+
+        if (user.getPasswordHash() != null && PasswordHashUtil.verifyPassword(password, user.getPasswordHash())) {
+            return userMapper.mapTo(user);
+        }
+
+        return null;
     }
 }

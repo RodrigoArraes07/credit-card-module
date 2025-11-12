@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import org.jala.university.commons.domain.entity.BaseEntity;
+import org.jala.university.domain.enums.CardType;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 import org.springframework.data.annotation.CreatedDate;
@@ -32,6 +33,9 @@ public final class CreditCard implements BaseEntity<UUID> {
     @Column(name = "mask_card_number", nullable = false)
     private String maskCardNumber;
 
+    @Column(name = "holder_name", nullable = false)
+    private String holderName;
+
     @Column(nullable = false)
     private YearMonth expiration;
 
@@ -39,7 +43,14 @@ public final class CreditCard implements BaseEntity<UUID> {
     private Double limitAmount;
 
     @Column
+    private Double maxLimit;
+
+    @Column
     private TargetType targetType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "card_type")
+    private CardType cardType;
 
     @Column(nullable = false, length = 3)
     private Integer cvc;
