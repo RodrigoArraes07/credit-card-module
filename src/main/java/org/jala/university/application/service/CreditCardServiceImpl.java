@@ -167,6 +167,10 @@ public class CreditCardServiceImpl implements CreditCardService {
                 return buildUpdateErrorResponse("Senha incorreta.");
             }
 
+            if (updateDto.getNewLimitAmount() == null && updateDto.getNewDueDay() == null) {
+                return buildUpdateErrorResponse("Informe ao menos limite ou dia de vencimento para alterar.");
+            }
+
             boolean limitUpdated = false;
             boolean dueDateUpdated = false;
             int affectedInvoices = 0;
@@ -185,8 +189,11 @@ public class CreditCardServiceImpl implements CreditCardService {
                 }
 
                 List<Invoice> futureInvoices = invoiceRepository.findFutureInvoicesByCreditCard(creditCard, LocalDate.now());
+                int requestedDay = updateDto.getNewDueDay();
                 for (Invoice invoice : futureInvoices) {
-                    LocalDate newDueDate = invoice.getDueDate().withDayOfMonth(updateDto.getNewDueDay());
+                    int lastDay = invoice.getDueDate().lengthOfMonth();
+                    int effectiveDay = Math.min(requestedDay, lastDay);
+                    LocalDate newDueDate = invoice.getDueDate().withDayOfMonth(effectiveDay);
                     invoice.setDueDate(newDueDate);
                     invoiceRepository.save(invoice);
                     affectedInvoices++;
