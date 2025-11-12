@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.jala.university.presentation.controller.CardTypeSelectionController"
+            fitToWidth="true"
+            stylesheets="@styles/application.css"
+            style="-fx-background: #F5F5F5; -fx-background-color: #F5F5F5;">
+
+    <VBox spacing="38" alignment="TOP_CENTER" style="-fx-background-color: #F5F5F5; -fx-padding: 40 50;">
+
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <Button styleClass="button-secondary"
+                    onAction="#handleBack"
+                    style="-fx-pref-width: 120; -fx-pref-height: 44;">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <FontAwesomeIconView glyphName="ARROW_LEFT" size="14" fill="#1565C0"/>
+                        <Label text="Voltar"
+                               style="-fx-text-fill: #1565C0; -fx-font-weight: 600; -fx-font-size: 14px;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <VBox spacing="15" alignment="CENTER">
+            <HBox spacing="12" alignment="CENTER">
+                <FontAwesomeIconView glyphName="CREDIT_CARD" size="36" fill="#1565C0"/>
+                <Label text="Escolha seu Cartão"
+                       style="-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #212121; -fx-letter-spacing: 0.5;"/>
+            </HBox>
+            <Label text="Selecione o cartão que melhor se encaixa no seu estilo de vida"
+                   style="-fx-font-size: 15px; -fx-text-fill: #757575; -fx-font-weight: 500;"/>
+        </VBox>
+
+        <VBox fx:id="cardContainer" spacing="26" alignment="TOP_CENTER" style="-fx-padding: 10 0 30 0; -fx-max-width: 850;"/>
+
+    </VBox>
+</ScrollPane>

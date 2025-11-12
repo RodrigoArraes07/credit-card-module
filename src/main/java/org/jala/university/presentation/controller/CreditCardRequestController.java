@@ -2,21 +2,25 @@ package org.jala.university.presentation.controller;
 
 import jakarta.persistence.EntityManager;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.dto.UserCreateDto;
-import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.domain.entity.User;
+import org.jala.university.domain.enums.CardType;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.infrastructure.config.AppConfig;
 import org.jala.university.infrastructure.persistence.UserRepositoryImpl;
+import org.jala.university.infrastructure.util.PasswordHashUtil;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -35,7 +39,10 @@ public class CreditCardRequestController extends BaseController {
     private TextField incomeField;
 
     @FXML
-    private PasswordField passwordField;
+    private PasswordField userPasswordField;
+
+    @FXML
+    private PasswordField cardPasswordField;
 
     @FXML
     private VBox limitCard;
@@ -47,6 +54,9 @@ public class CreditCardRequestController extends BaseController {
     private VBox passwordBox;
 
     @FXML
+    private VBox cardPasswordBox;
+
+    @FXML
     private Button submitButton;
 
     @FXML
@@ -55,6 +65,7 @@ public class CreditCardRequestController extends BaseController {
     private CreditCardService creditCardService;
     private Double calculatedLimit;
     private final UserRepositoryImpl userRepository;
+    private CardType selectedCardType;
 
     public CreditCardRequestController() {
         AppConfig appConfig = AppConfig.getInstance();
@@ -66,16 +77,29 @@ public class CreditCardRequestController extends BaseController {
         this.creditCardService = service;
     }
 
+    public void setSelectedCardType(CardType cardType) {
+        this.selectedCardType = cardType;
+    }
+
 
     @FXML
     private void initialize() {
-        UserCreateDto user = UserCreateDto.builder()
-                .name("AmauryMagno")
-                .email("Magno@gmail.com")
-                .cpf("00800254915")
-                .password_hash("123456")
-                .build();
-        userRepository.save(user);
+    }
+
+    @FXML
+    private void handleBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/card-type-selection-view.fxml")
+            );
+            Parent root = loader.load();
+
+            Stage stage = (Stage) nameField.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            System.err.println("Error loading card type selection view: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -106,6 +130,9 @@ public class CreditCardRequestController extends BaseController {
             passwordBox.setVisible(true);
             passwordBox.setManaged(true);
 
+            cardPasswordBox.setVisible(true);
+            cardPasswordBox.setManaged(true);
+
             submitButton.setVisible(true);
             submitButton.setManaged(true);
 
@@ -126,42 +153,52 @@ public class CreditCardRequestController extends BaseController {
         }
 
         try {
-            // Busca o usuário pelo CPF
-            User existingUser = userRepository.findByCpf(cpfField.getText());
+            User user = userRepository.findByCpf(cpfField.getText());
 
-            // Se o usuário não existir, mostra mensagem de erro
-            if (existingUser == null) {
-                showMessage("CPF não encontrado no sistema", "#f44336");
-                setFieldError(cpfField, true);
-                return;
-            }
+            if (user == null) {
+                UserCreateDto userCreateDto = UserCreateDto.builder()
+                        .name(nameField.getText())
+                        .email(emailField.getText())
+                        .cpf(cpfField.getText())
+                        .password_hash(userPasswordField.getText())
+                        .build();
 
-            // Verifica se os dados informados correspondem ao usuário existente
-            if (!existingUser.getName().equalsIgnoreCase(nameField.getText()) ||
-                    !existingUser.getEmail().equalsIgnoreCase(emailField.getText())) {
-                showMessage("Dados não correspondem ao usuário cadastrado", "#f44336");
-                return;
+                user = userRepository.save(userCreateDto);
+
+                if (user == null) {
+                    showMessage("Erro ao criar usuário", "#f44336");
+                    return;
+                }
             }
 
             CreditCardRequestDto request = CreditCardRequestDto.builder()
-                    .holderName(existingUser.getName()) // Usa o nome do usuário existente
-                    .cpf(existingUser.getCpf())        // Usa o CPF do usuário existente
-                    .email(existingUser.getEmail())     // Usa o email do usuário existente
+                    .holderName(user.getName())
+                    .cpf(user.getCpf())
+                    .email(user.getEmail())
                     .monthlyIncome(Double.parseDouble(incomeField.getText().replace(",", ".")))
-                    .password(passwordField.getText())
+                    .password(cardPasswordField.getText())
+                    .cardType(selectedCardType)
                     .build();
 
-            CreditCardResponseDto response = creditCardService.requestCreditCard(request);
+            CreditCardResponseDto response = creditCardService.requestCreditCard(request, user);
 
             if (response.getStatus() == CreditCardStatus.ACTIVE) {
                 showSuccessMessage(response);
-                clearForm();
+
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(3000);
+                        javafx.application.Platform.runLater(this::navigateToLogin);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             } else {
                 showMessage(response.getMessage(), "#f44336");
             }
         } catch (Exception e) {
             showMessage("Erro ao processar a solicitação: " + e.getMessage(), "#f44336");
-            e.printStackTrace(); // Para debug
+            e.printStackTrace();
         }
     }
 
@@ -192,9 +229,16 @@ public class CreditCardRequestController extends BaseController {
             valid = false;
         }
 
-        if (passwordField.getText() == null || passwordField.getText().length() != 4) {
-            setFieldError(passwordField, true);
-            showMessage("A senha deve ter exatamente 4 dígitos", "#f44336");
+        String userPassword = userPasswordField.getText();
+        if (userPassword == null || !PasswordHashUtil.isValidPassword(userPassword)) {
+            setFieldError(userPasswordField, true);
+            showMessage("A senha de login deve ter no mínimo 6 caracteres, incluindo letras e números", "#f44336");
+            valid = false;
+        }
+
+        if (cardPasswordField.getText() == null || cardPasswordField.getText().length() != 4) {
+            setFieldError(cardPasswordField, true);
+            showMessage("A senha do cartão deve ter exatamente 4 dígitos", "#f44336");
             valid = false;
         }
 
@@ -206,7 +250,8 @@ public class CreditCardRequestController extends BaseController {
         setFieldError(cpfField, false);
         setFieldError(emailField, false);
         setFieldError(incomeField, false);
-        setFieldError(passwordField, false);
+        setFieldError(userPasswordField, false);
+        setFieldError(cardPasswordField, false);
     }
 
     private void setFieldError(TextField field, boolean hasError) {
@@ -249,13 +294,17 @@ public class CreditCardRequestController extends BaseController {
         cpfField.clear();
         emailField.clear();
         incomeField.clear();
-        passwordField.clear();
+        userPasswordField.clear();
+        cardPasswordField.clear();
 
         limitCard.setVisible(false);
         limitCard.setManaged(false);
 
         passwordBox.setVisible(false);
         passwordBox.setManaged(false);
+
+        cardPasswordBox.setVisible(false);
+        cardPasswordBox.setManaged(false);
 
         submitButton.setVisible(false);
         submitButton.setManaged(false);
@@ -266,6 +315,24 @@ public class CreditCardRequestController extends BaseController {
     private String formatCurrency(Double value) {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         return formatter.format(value);
+    }
+
+    private void navigateToLogin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/login-view.fxml")
+            );
+            Parent root = loader.load();
+
+            LoginController controller = loader.getController();
+            controller.setUserService(AppConfig.getInstance().getUserService());
+
+            Stage stage = (Stage) nameField.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            System.err.println("Error loading login view: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }

@@ -5,8 +5,11 @@ import org.jala.university.commons.presentation.View;
 
 @Getter
 public enum CreditCardView {
-    MAIN("main-view.fxml"),
-    CREDIT_CARD_REQUEST("credit-card-request-view.fxml");
+    LOGIN("login-view.fxml"),
+    HOME("home-view.fxml"),
+    CARD_TYPE_SELECTION("card-type-selection-view.fxml"),
+    REQUEST_CARD("credit-card-request-view.fxml"),
+    MAIN("main-view.fxml");
 
     private final View view;
 

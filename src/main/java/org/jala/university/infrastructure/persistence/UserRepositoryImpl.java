@@ -8,6 +8,7 @@ import org.jala.university.application.dto.UserDto;
 import org.jala.university.commons.infrastructure.persistance.CrudRepository;
 import org.jala.university.domain.entity.User;
 import org.jala.university.domain.repository.UserRepository;
+import org.jala.university.infrastructure.util.PasswordHashUtil;
 
 import java.util.UUID;
 /**
@@ -38,14 +39,21 @@ public class UserRepositoryImpl
 
     @Override
     public User save(UserCreateDto userCreateDto) {
+        EntityManager em = getEntityManager();
+
         try {
-            EntityManager em = getEntityManager();
+            User existingUser = findByCpf(userCreateDto.getCpf());
+            if (existingUser != null) {
+                throw new IllegalStateException("Já existe um usuário cadastrado com este CPF");
+            }
+
+            String hashedPassword = PasswordHashUtil.hashPassword(userCreateDto.getPassword_hash());
 
             User user = User.builder()
-                    .id(UUID.randomUUID())
-                    .name(userCreateDto.getName().toLowerCase())
-                    .email(userCreateDto.getEmail().toLowerCase())
+                    .name(userCreateDto.getName())
+                    .email(userCreateDto.getEmail())
                     .cpf(userCreateDto.getCpf())
+                    .passwordHash(hashedPassword)
                     .phone(userCreateDto.getPhone())
                     .birthDate(userCreateDto.getBirthDate())
                     .zipCode(userCreateDto.getZipCode())
@@ -53,16 +61,15 @@ public class UserRepositoryImpl
                     .state(userCreateDto.getState())
                     .build();
 
-            // Verifica se já existe um usuário com o mesmo CPF
-            if (findByCpf(user.getCpf()) != null) {
-                throw new IllegalStateException("Já existe um usuário cadastrado com este CPF");
-            }
-
+            em.getTransaction().begin();
             em.persist(user);
-            em.flush(); // Força o flush para garantir que o ID seja gerado
+            em.getTransaction().commit();
 
             return user;
         } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw new RuntimeException("Erro ao salvar usuário: " + e.getMessage(), e);
         }
     }
