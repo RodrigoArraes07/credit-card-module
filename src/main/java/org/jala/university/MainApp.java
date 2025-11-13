@@ -3,17 +3,14 @@ package org.jala.university;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
-import org.jala.university.presentation.controller.LoginController;
+import org.jala.university.presentation.controller.CreditCardRequestController;
 
 public final class MainApp extends Application {
 
-    private static final String APPLICATION_TITLE = "JALA Credit Card Management";
-    private static final int WINDOW_WIDTH = 1000;
-    private static final int WINDOW_HEIGHT = 700;
+    private static final String APPLICATION_TITLE = "Credit Card Module - Solicitar Cartão";
 
     public static void main(String[] args) {
         launch(args);
@@ -22,31 +19,33 @@ public final class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            System.out.println("Starting application...");
+            System.out.println("Iniciando aplicação...");
 
             AppConfig config = AppConfig.getInstance();
-
-            Scene scene = new Scene(new Pane(), WINDOW_WIDTH, WINDOW_HEIGHT);
-            ViewSwitcher.setup(primaryStage, scene);
+            System.out.println("AppConfig criado");
 
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/login-view.fxml")
+                    getClass().getResource("/credit-card-request-view.fxml")
             );
-            Pane root = loader.load();
+            System.out.println("FXMLLoader criado");
 
-            LoginController controller = loader.getController();
-            controller.setUserService(config.getUserService());
+            VBox root = loader.load();
+            System.out.println("FXML carregado");
 
-            scene.setRoot(root);
+            CreditCardRequestController controller = loader.getController();
+            controller.setCreditCardService(config.getCreditCardService());
+            System.out.println("Service injetado no controller");
+
+            Scene scene = new Scene(root, 600, 700);
             primaryStage.setScene(scene);
             primaryStage.setTitle(APPLICATION_TITLE);
             primaryStage.setOnCloseRequest(e -> config.close());
             primaryStage.show();
 
-            System.out.println("Application started successfully!");
+            System.out.println("Aplicação iniciada com sucesso!");
 
         } catch (Exception e) {
-            System.err.println("ERROR starting application:");
+            System.err.println("ERRO ao iniciar aplicação:");
             e.printStackTrace();
         }
     }

@@ -7,7 +7,6 @@ import org.jala.university.application.dto.UserCreateDto;
 import org.jala.university.commons.infrastructure.persistance.CrudRepository;
 import org.jala.university.domain.entity.User;
 import org.jala.university.domain.repository.UserRepository;
-import org.jala.university.infrastructure.util.PasswordHashUtil;
 
 import java.util.UUID;
 /**
@@ -38,21 +37,14 @@ public class UserRepositoryImpl
 
     @Override
     public User save(UserCreateDto userCreateDto) {
-        EntityManager em = getEntityManager();
-
         try {
-            User existingUser = findByCpf(userCreateDto.getCpf());
-            if (existingUser != null) {
-                throw new IllegalStateException("Já existe um usuário cadastrado com este CPF");
-            }
-
-            String hashedPassword = PasswordHashUtil.hashPassword(userCreateDto.getPassword_hash());
+            EntityManager em = getEntityManager();
 
             User user = User.builder()
-                    .name(userCreateDto.getName())
-                    .email(userCreateDto.getEmail())
+                    .id(UUID.randomUUID())
+                    .name(userCreateDto.getName().toLowerCase())
+                    .email(userCreateDto.getEmail().toLowerCase())
                     .cpf(userCreateDto.getCpf())
-                    .passwordHash(hashedPassword)
                     .phone(userCreateDto.getPhone())
                     .birthDate(userCreateDto.getBirthDate())
                     .zipCode(userCreateDto.getZipCode())
@@ -60,17 +52,19 @@ public class UserRepositoryImpl
                     .state(userCreateDto.getState())
                     .build();
 
-            em.getTransaction().begin();
-            em.persist(user);
-            em.getTransaction().commit();
+            // Verifica se já existe um usuário com o mesmo CPF
+            if (findByCpf(user.getCpf()) != null) {
+                throw new IllegalStateException("Já existe um usuário cadastrado com este CPF");
+            }
+
+            em.merge(user);
+            em.flush(); // Força o flush para garantir que o ID seja gerado
 
             return user;
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             throw new RuntimeException("Erro ao salvar usuário: " + e.getMessage(), e);
         }
     }
+
 
 }

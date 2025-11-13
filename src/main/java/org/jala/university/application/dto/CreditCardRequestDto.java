@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.jala.university.domain.enums.CardType;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 
@@ -24,5 +23,4 @@ public class CreditCardRequestDto implements Serializable {
     private Double monthlyIncome;
     private String email;
     private String password;
-    private CardType cardType;
 }

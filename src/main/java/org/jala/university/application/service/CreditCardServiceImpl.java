@@ -4,15 +4,20 @@ import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.dto.CreditCardRequestDto;
+import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.mapper.CreditCardMapper;
 import org.jala.university.domain.entity.CreditCard;
-import org.jala.university.domain.entity.User;
+import org.jala.university.domain.enums.CreditCardStatus;
+import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.repository.CreditCardRepository;
 
 import java.time.YearMonth;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Random;
 import java.util.Random;
 import java.util.UUID;
 
@@ -24,14 +29,6 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Override
     public List<CreditCardDto> findAll() {
         return List.of();
-    }
-
-    @Override
-    public List<CreditCardDto> findByUserId(UUID userId) {
-        List<CreditCard> cards = creditCardRepository.findByUserId(userId);
-        return cards.stream()
-                .map(creditCardMapper::mapTo)
-                .toList();
     }
 
     @Override
@@ -55,14 +52,10 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCardResponseDto requestCreditCard(CreditCardRequestDto request, User user) {
+    public CreditCardResponseDto requestCreditCard(CreditCardRequestDto request) {
         try {
             if (!isValidRequest(request)) {
                 return buildErrorResponse("Dados inválidos. Verifique as informações.");
-            }
-
-            if (user == null) {
-                return buildErrorResponse("Usuário não encontrado.");
             }
 
             Double approvedLimit = calculatePreApprovedLimit(request.getMonthlyIncome());
@@ -76,16 +69,12 @@ public class CreditCardServiceImpl implements CreditCardService {
             CreditCard creditCard = CreditCard.builder()
                     .cardNumber(cardNumber)
                     .maskCardNumber(maskedNumber)
-                    .holderName(request.getHolderName())
                     .limitAmount(approvedLimit)
-                    .maxLimit(approvedLimit)
                     .targetType(targetType)
-                    .cardType(request.getCardType())
                     .cvc(cvv)
                     .expiration(expiration)
                     .passwordHash(request.getPassword())
                     .status(CreditCardStatus.ACTIVE)
-                    .user(user)
                     .build();
 
             CreditCard saved = creditCardRepository.save(creditCard);
@@ -117,36 +106,6 @@ public class CreditCardServiceImpl implements CreditCardService {
         return monthlyIncome * 2.5;
     }
 
-    /**
-     * @param cardId 
-     * @param userId
-     * @return
-     */
-    @Override
-    public boolean blockCard(UUID cardId, UUID userId) {
-        return false;
-    }
-
-    /**
-     * @param cardId 
-     * @param userId
-     * @return
-     */
-    @Override
-    public boolean unblockCard(UUID cardId, UUID userId) {
-        return false;
-    }
-
-    /**
-     * @param cardId 
-     * @param userId
-     * @return
-     */
-    @Override
-    public boolean cancelCard(UUID cardId, UUID userId) {
-        return false;
-    }
-
     private boolean isValidRequest(CreditCardRequestDto request) {
         return request.getHolderName() != null && !request.getHolderName().isBlank()
                 && request.getCpf() != null && !request.getCpf().isBlank()
@@ -172,69 +131,6 @@ public class CreditCardServiceImpl implements CreditCardService {
         Random random = new Random();
         return random.nextInt(900) + 100;
     }
-    @Override
-    public CreditCardDto blockCardWithMessage(UUID cardId, UUID userId) {
-        CreditCard card = creditCardRepository.findById(cardId);
-        if (card == null) {
-            return buildCreditCardDto(null, "Cartão não encontrado.");
-        }
-        if (!card.getUser().getId().equals(userId)) {
-            return buildCreditCardDto(card, "Usuário não autorizado.");
-        }
-        if (card.getStatus() == CreditCardStatus.BLOCKED) {
-            return buildCreditCardDto(card, "Cartão já está bloqueado.");
-        }
-        card.setStatus(CreditCardStatus.BLOCKED);
-        creditCardRepository.save(card);
-        return buildCreditCardDto(card, "Cartão bloqueado com sucesso.");
-    }
-
-    @Override
-    public CreditCardDto unblockCardWithMessage(UUID cardId, UUID userId) {
-        CreditCard card = creditCardRepository.findById(cardId);
-        if (card == null) {
-            return buildCreditCardDto(null, "Cartão não encontrado.");
-        }
-        if (!card.getUser().getId().equals(userId)) {
-            return buildCreditCardDto(card, "Usuário não autorizado.");
-        }
-        if (card.getStatus() != CreditCardStatus.BLOCKED) {
-            return buildCreditCardDto(card, "O cartão não está bloqueado.");
-        }
-        card.setStatus(CreditCardStatus.ACTIVE);
-        creditCardRepository.save(card);
-        return buildCreditCardDto(card, "Cartão desbloqueado com sucesso.");
-    }
-
-    @Override
-    public CreditCardDto cancelCardWithMessage(UUID cardId, UUID userId) {
-        CreditCard card = creditCardRepository.findById(cardId);
-        if (card == null) {
-            return buildCreditCardDto(null, "Cartão não encontrado.");
-        }
-        if (!card.getUser().getId().equals(userId)) {
-            return buildCreditCardDto(card, "Usuário não autorizado.");
-        }
-        if (card.getStatus() == CreditCardStatus.CANCELED) {
-            return buildCreditCardDto(card, "Cartão já está cancelado.");
-        }
-        card.setStatus(CreditCardStatus.CANCELED);
-        creditCardRepository.save(card);
-        return buildCreditCardDto(card, "Cartão cancelado com sucesso.");
-    }
-
-    private CreditCardDto buildCreditCardDto(CreditCard card, String message) {
-        if (card == null) {
-            return CreditCardDto.builder()
-                    .message(message)
-                    .build();
-        }
-        CreditCardDto dto = creditCardMapper.toDto(card);
-        dto.setMessage(message);
-        return dto;
-    }
-
-
 
     private CreditCardResponseDto buildErrorResponse(String message) {
         return CreditCardResponseDto.builder()
