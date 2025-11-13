@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.jala.university.presentation.controller.InvoiceController"
+            stylesheets="@styles/application.css"
+            prefWidth="1000" prefHeight="700"
+            style="-fx-background-color: #F5F5F5;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15"
+              style="-fx-background-color: white; -fx-padding: 18 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);">
+
+            <Button styleClass="icon-button" onAction="#handleBack">
+                <graphic>
+                    <FontAwesomeIconView glyphName="ARROW_LEFT" size="16" fill="#616161"/>
+                </graphic>
+            </Button>
+
+            <Label text="Faturas" styleClass="text-title"
+                   style="-fx-font-size: 20px; -fx-font-weight: 700;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button styleClass="icon-button" onAction="#handleDownload">
+                <graphic>
+                    <FontAwesomeIconView glyphName="DOWNLOAD" size="16" fill="#616161"/>
+                </graphic>
+            </Button>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox spacing="25" style="-fx-padding: 30;">
+
+                <ComboBox fx:id="cardSelector" promptText="Selecione um cartão"
+                          styleClass="text-field" maxWidth="Infinity"
+                          style="-fx-pref-height: 50; -fx-font-size: 15px;"/>
+
+                <Label fx:id="yearLabel" text="2025"
+                       style="-fx-font-size: 32px; -fx-font-weight: 700; -fx-text-fill: #212121; -fx-alignment: CENTER;"
+                       maxWidth="Infinity"/>
+
+                <VBox spacing="15" styleClass="card" style="-fx-padding: 25 20;">
+
+                    <HBox alignment="CENTER" spacing="40">
+                        <VBox alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Fatura paga" styleClass="text-small"
+                                   style="-fx-text-fill: #757575;"/>
+                            <Label fx:id="previousInvoiceAmount" text="R$ 0,00"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #2E7D32;"/>
+                        </VBox>
+
+                        <VBox alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Fatura aberta" styleClass="text-small"
+                                   style="-fx-text-fill: #757575;"/>
+                            <Label fx:id="currentInvoiceAmount" text="R$ 0,00"
+                                   style="-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #7B1FA2;"/>
+                        </VBox>
+
+                        <VBox alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Próxima fatura" styleClass="text-small"
+                                   style="-fx-text-fill: #757575;"/>
+                            <Label fx:id="nextInvoiceAmount" text="R$ 0,00"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #9E9E9E;"/>
+                        </VBox>
+                    </HBox>
+
+                    <StackPane>
+                        <org.jala.university.presentation.components.invoice.TimelineGraph
+                            fx:id="timelineGraph" prefHeight="120" maxWidth="Infinity"/>
+                    </StackPane>
+
+                    <HBox alignment="CENTER" spacing="40" style="-fx-padding: 0 20;">
+                        <Label fx:id="previousMonthLabel" text="Out."
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #757575;"
+                               maxWidth="Infinity" alignment="CENTER"/>
+                        <Label fx:id="currentMonthLabel" text="Nov."
+                               style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #424242;"
+                               maxWidth="Infinity" alignment="CENTER"/>
+                        <Label fx:id="nextMonthLabel" text="Dez."
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #757575;"
+                               maxWidth="Infinity" alignment="CENTER"/>
+                    </HBox>
+
+                </VBox>
+
+                <VBox spacing="15" styleClass="card">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <FontAwesomeIconView glyphName="CALENDAR" size="16" fill="#757575"/>
+                        <Label text="Vencimento:" style="-fx-font-size: 14px; -fx-text-fill: #757575;"/>
+                        <Label fx:id="dueDateLabel" text="26 de Novembro"
+                               style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #424242;"/>
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <FontAwesomeIconView glyphName="SHOPPING_CART" size="16" fill="#757575"/>
+                        <Label text="Compras até:" style="-fx-font-size: 14px; -fx-text-fill: #757575;"/>
+                        <Label fx:id="closingDateLabel" text="18 de Novembro"
+                               style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #424242;"/>
+                    </HBox>
+
+                    <Separator style="-fx-padding: 5 0;"/>
+
+                    <Button text="PAGAR FATURA COMPLETA" styleClass="button-primary"
+                            onAction="#handlePayFullInvoice" maxWidth="Infinity"
+                            style="-fx-pref-height: 56; -fx-font-size: 15px; -fx-font-weight: 700;"/>
+                </VBox>
+
+                <GridPane hgap="12" vgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="25"/>
+                    </columnConstraints>
+
+                    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="0"
+                          onMouseClicked="#handleInstallPurchase" styleClass="card"
+                          style="-fx-cursor: hand; -fx-padding: 18 12;">
+                        <StackPane>
+                            <Circle radius="24" style="-fx-fill: #FFF3E0;"/>
+                            <FontAwesomeIconView glyphName="PERCENT" size="20" fill="#F57C00"/>
+                        </StackPane>
+                        <Label text="Parcelar" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                        <Label text="Compra" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                    </VBox>
+
+                    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="1"
+                          onMouseClicked="#handleAnticipatePix" styleClass="card"
+                          style="-fx-cursor: hand; -fx-padding: 18 12;">
+                        <StackPane>
+                            <Circle radius="24" style="-fx-fill: #E3F2FD;"/>
+                            <FontAwesomeIconView glyphName="EXCHANGE" size="20" fill="#1565C0"/>
+                        </StackPane>
+                        <Label text="Antecipar" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                        <Label text="via PIX" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                    </VBox>
+
+                    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="2"
+                          onMouseClicked="#handleProtectCard" styleClass="card"
+                          style="-fx-cursor: hand; -fx-padding: 18 12;">
+                        <StackPane>
+                            <Circle radius="24" style="-fx-fill: #E8F5E9;"/>
+                            <FontAwesomeIconView glyphName="SHIELD" size="20" fill="#2E7D32"/>
+                        </StackPane>
+                        <Label text="Proteger" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                        <Label text="Cartão" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                    </VBox>
+
+                    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="3"
+                          onMouseClicked="#handleBarcode" styleClass="card"
+                          style="-fx-cursor: hand; -fx-padding: 18 12;">
+                        <StackPane>
+                            <Circle radius="24" style="-fx-fill: #F5F5F5;"/>
+                            <FontAwesomeIconView glyphName="BARCODE" size="20" fill="#616161"/>
+                        </StackPane>
+                        <Label text="Código" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                        <Label text="Barras" wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                    </VBox>
+                </GridPane>
+
+                <VBox spacing="18" styleClass="card">
+                    <HBox alignment="CENTER_LEFT">
+                        <FontAwesomeIconView glyphName="FILE_TEXT" size="18" fill="#424242"/>
+                        <Label text="Lançamentos" styleClass="label-header"
+                               style="-fx-padding: 0 0 0 10;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="installmentsTotalLabel" text="R$ 0,00" styleClass="label-value"
+                               style="-fx-font-size: 20px;"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <VBox fx:id="installmentsList" spacing="12"/>
+                </VBox>
+
+                <VBox fx:id="emptyState" alignment="CENTER" spacing="20"
+                      styleClass="card" style="-fx-padding: 60;" visible="false" managed="false">
+                    <FontAwesomeIconView glyphName="FILE_TEXT" size="64" fill="#BDBDBD"/>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label text="Nenhuma fatura disponível"
+                               style="-fx-font-size: 18px; -fx-text-fill: #616161; -fx-font-weight: 600;"/>
+                        <Label text="Suas faturas e compras aparecerão aqui"
+                               style="-fx-font-size: 14px; -fx-text-fill: #9E9E9E;"/>
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

@@ -8,6 +8,7 @@
 <ScrollPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.jala.university.presentation.controller.CardTypeSelectionController"
+            prefWidth="1000" prefHeight="700"
             fitToWidth="true"
             stylesheets="@styles/application.css"
             style="-fx-background: #F5F5F5; -fx-background-color: #F5F5F5;">

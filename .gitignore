@@ -5,3 +5,6 @@
 .env
 src/main/java/org/jala/university/env
 .claude/
+database/
+.DS_Store
+*.backup

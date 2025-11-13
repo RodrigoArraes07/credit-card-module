@@ -1,13 +1,9 @@
 package org.jala.university.presentation.controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.UserService;
 import org.jala.university.commons.presentation.BaseController;
@@ -68,21 +64,8 @@ public class LoginController extends BaseController {
                 return;
             }
 
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/home-view.fxml")
-            );
-            Parent root = loader.load();
-
-            HomeController homeController = loader.getController();
-            homeController.setUserService(AppConfig.getInstance().getUserService());
-            homeController.setCreditCardService(AppConfig.getInstance().getCreditCardService());
-
             UserContext context = new UserContext(user.getId());
-            homeController.setContext(context);
-            homeController.loadData();
-
-            Stage stage = (Stage) cpfField.getScene().getWindow();
-            stage.getScene().setRoot(root);
+            ViewSwitcher.switchTo(CreditCardView.HOME.getView(), context);
 
         } catch (Exception e) {
             showError("Erro ao realizar login: " + e.getMessage());
@@ -92,18 +75,7 @@ public class LoginController extends BaseController {
 
     @FXML
     private void handleRequestCard() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/card-type-selection-view.fxml")
-            );
-            Parent root = loader.load();
-
-            Stage stage = (Stage) cpfField.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (Exception e) {
-            System.err.println("Error loading card type selection view: " + e.getMessage());
-            e.printStackTrace();
-        }
+        ViewSwitcher.switchTo(CreditCardView.CARD_TYPE_SELECTION.getView());
     }
 
     private boolean validateFields(String cpf, String password) {

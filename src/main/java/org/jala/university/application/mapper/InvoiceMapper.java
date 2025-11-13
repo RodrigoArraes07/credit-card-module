@@ -1,9 +1,13 @@
 package org.jala.university.application.mapper;
 
 import org.jala.university.application.dto.InvoiceCreateDTO;
+import org.jala.university.application.dto.InvoiceDetailDto;
+import org.jala.university.application.dto.PurchaseInstallmentDto;
 import org.jala.university.commons.application.mapper.Mapper;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.application.dto.InvoiceDto;
+
+import java.util.List;
 
 /**
  * InvoiceMapper é uma classe utilitária responsável por converter objetos do tipo Invoice (entidade)
@@ -81,6 +85,20 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
                 .dueDate(input.getDueDate())
                 .totalAmount(input.getTotalAmount())
                 .isPaid(input.getIsPaid())
+                .build();
+    }
+
+    public InvoiceDetailDto toDetailDto(Invoice entity, List<PurchaseInstallmentDto> installments) {
+        if (entity == null) {
+            return null;
+        }
+        return InvoiceDetailDto.builder()
+                .id(entity.getId())
+                .closingDate(entity.getClosingDate())
+                .dueDate(entity.getDueDate())
+                .totalAmount(entity.getTotalAmount())
+                .isPaid(entity.getIsPaid())
+                .installments(installments != null ? installments : List.of())
                 .build();
     }
 }
