@@ -15,6 +15,7 @@ public interface CreditCardService {
     List<CreditCardDto> findAll();
     List<CreditCardDto> findByUserId(UUID userId);
     CreditCardDto findById(UUID id);
+    CreditCardDto findByCardNumber(String cardNumber);
     CreditCardDto create(CreditCard creditCard);
     CreditCardDto update(UUID id, CreditCard creditCard);
     void deleteById(UUID id);

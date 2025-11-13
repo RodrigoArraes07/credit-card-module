@@ -34,8 +34,10 @@ public class CreditCardMapper implements Mapper<CreditCard, CreditCardDto> {
                 .maskCardNumber(input.getMaskCardNumber())
                 .holderName(input.getHolderName())
                 .limitAmount(input.getLimitAmount())
+                .maxLimit(input.getMaxLimit())
                 .targetType(input.getTargetType())
                 .cvc(input.getCvc())
+                .passwordHash(input.getPasswordHash())
                 .status(input.getStatus())
                 .build();
     }

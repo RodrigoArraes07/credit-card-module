@@ -46,6 +46,12 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
+    public CreditCardDto findByCardNumber(String cardNumber) {
+        CreditCard card = creditCardRepository.findByCardNumber(cardNumber);
+        return card != null ? creditCardMapper.mapTo(card) : null;
+    }
+
+    @Override
     public CreditCardDto create(CreditCard creditCard) {
         return null;
     }

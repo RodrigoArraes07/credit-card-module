@@ -1,0 +1,827 @@
+package org.jala.university.presentation.controller;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.animation.FadeTransition;
+import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.CubicCurveTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.util.Duration;
+import org.jala.university.application.dto.CreditCardDto;
+import org.jala.university.application.dto.InvoiceDetailDto;
+import org.jala.university.application.dto.InvoiceTimelineDto;
+import org.jala.university.application.dto.PurchaseInstallmentDto;
+import org.jala.university.application.service.CreditCardService;
+import org.jala.university.application.service.InvoiceService;
+import org.jala.university.commons.presentation.BaseController;
+import org.jala.university.commons.presentation.ViewContext;
+import org.jala.university.commons.presentation.ViewSwitcher;
+import org.jala.university.domain.enums.PurchaseCategory;
+import org.jala.university.infrastructure.config.AppConfig;
+import org.jala.university.presentation.CreditCardView;
+import org.jala.university.presentation.context.InvoiceContext;
+
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
+
+public class InvoiceController extends BaseController {
+
+    private final InvoiceService invoiceService;
+    private final CreditCardService creditCardService;
+
+    @FXML private ComboBox<String> cardSelector;
+    @FXML private Label yearLabel;
+    @FXML private Label previousInvoiceAmount;
+    @FXML private Label currentInvoiceAmount;
+    @FXML private Label nextInvoiceAmount;
+    @FXML private Pane timelineGraphPane;
+    @FXML private Label previousMonthLabel;
+    @FXML private Label currentMonthLabel;
+    @FXML private Label nextMonthLabel;
+    @FXML private Label dueDateLabel;
+    @FXML private Label closingDateLabel;
+    @FXML private Label installmentsTotalLabel;
+    @FXML private VBox installmentsList;
+    @FXML private VBox emptyState;
+
+    private UUID creditCardId;
+    private UUID userId;
+    private List<CreditCardDto> userCards;
+    private InvoiceTimelineDto timelineData;
+    private Circle selectedOuterCircle;
+    private Circle selectedInnerCircle;
+    private Label selectedMonthLabel;
+
+    public InvoiceController() {
+        this.invoiceService = AppConfig.getInstance().getInvoiceService();
+        this.creditCardService = AppConfig.getInstance().getCreditCardService();
+    }
+
+    @FXML
+    private void initialize() {
+        System.out.println("InvoiceController.initialize() called");
+        timelineGraphPane.widthProperty().addListener((obs, old, newVal) -> {
+            if (timelineData != null) {
+                buildTimelineGraph(
+                        timelineData.getPreviousInvoice(),
+                        timelineData.getCurrentInvoice(),
+                        timelineData.getNextInvoice()
+                );
+            }
+        });
+    }
+
+    @Override
+    public void setContext(ViewContext context) {
+        System.out.println("InvoiceController.setContext() called with: " + context);
+        super.setContext(context);
+        loadData();
+    }
+
+    private void loadData() {
+        if (getContext() instanceof InvoiceContext ctx) {
+            this.userId = ctx.getUserId();
+            this.creditCardId = ctx.getCreditCardId();
+            loadUserCards();
+            loadInvoiceTimeline();
+        }
+    }
+
+    private void loadUserCards() {
+        try {
+            userCards = creditCardService.findByUserId(userId);
+
+            if (userCards != null && !userCards.isEmpty()) {
+                cardSelector.getItems().clear();
+
+                for (CreditCardDto card : userCards) {
+                    String cardDisplay = String.format("%s •••• %s",
+                            card.getTargetType() != null ? card.getTargetType().toString() : "Card",
+                            card.getMaskCardNumber() != null && card.getMaskCardNumber().length() >= 4 ?
+                                    card.getMaskCardNumber().substring(card.getMaskCardNumber().length() - 4) : "****");
+                    cardSelector.getItems().add(cardDisplay);
+                }
+
+                int currentIndex = findCardIndex(creditCardId);
+                if (currentIndex >= 0) {
+                    cardSelector.getSelectionModel().select(currentIndex);
+                }
+
+                cardSelector.setOnAction(e -> {
+                    int selectedIndex = cardSelector.getSelectionModel().getSelectedIndex();
+                    if (selectedIndex >= 0 && userCards != null && selectedIndex < userCards.size()) {
+                        CreditCardDto selectedCard = userCards.get(selectedIndex);
+                        this.creditCardId = selectedCard.getCredit_card_id();
+                        loadInvoiceTimeline();
+                    }
+                });
+            }
+
+            System.out.println("Loaded " + (userCards != null ? userCards.size() : 0) + " cards");
+        } catch (Exception e) {
+            System.err.println("Error loading user cards: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private int findCardIndex(UUID cardId) {
+        if (userCards == null) return -1;
+        for (int i = 0; i < userCards.size(); i++) {
+            if (userCards.get(i).getCredit_card_id().equals(cardId)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void loadInvoiceTimeline() {
+        System.out.println("loadInvoiceTimeline() called for creditCardId: " + creditCardId);
+        Optional<InvoiceTimelineDto> timeline = invoiceService.getInvoiceTimeline(creditCardId);
+
+        if (timeline.isEmpty() || timeline.get().getCurrentInvoice() == null) {
+            System.out.println("No timeline data found - showing empty state");
+            showEmptyStateWithMessage();
+            return;
+        }
+
+        System.out.println("Timeline data found - loading UI");
+        hideEmptyState();
+
+        timelineData = timeline.get();
+        InvoiceDetailDto current = timelineData.getCurrentInvoice();
+        InvoiceDetailDto previous = timelineData.getPreviousInvoice();
+        InvoiceDetailDto next = timelineData.getNextInvoice();
+
+        yearLabel.setText(String.valueOf(timelineData.getYear()));
+
+        if (current != null) {
+            updateTimelineLabels(previous, current, next);
+            buildTimelineGraph(previous, current, next);
+            loadCurrentInvoiceDetails(current);
+            loadPurchaseInstallments(current.getInstallments());
+        }
+    }
+
+    private void showEmptyStateWithMessage() {
+        System.out.println("showEmptyStateWithMessage() called - displaying full empty state");
+
+        try {
+            if (yearLabel != null) yearLabel.setText(String.valueOf(java.time.Year.now().getValue()));
+            if (previousInvoiceAmount != null) previousInvoiceAmount.setText("R$ 0,00");
+            if (currentInvoiceAmount != null) currentInvoiceAmount.setText("R$ 0,00");
+            if (nextInvoiceAmount != null) nextInvoiceAmount.setText("R$ 0,00");
+            if (previousMonthLabel != null) previousMonthLabel.setText("-");
+            if (currentMonthLabel != null) currentMonthLabel.setText("-");
+            if (nextMonthLabel != null) nextMonthLabel.setText("-");
+            if (dueDateLabel != null) dueDateLabel.setText("-");
+            if (closingDateLabel != null) closingDateLabel.setText("-");
+            if (installmentsTotalLabel != null) installmentsTotalLabel.setText("R$ 0,00");
+
+            if (installmentsList != null) installmentsList.getChildren().clear();
+            if (emptyState != null) {
+                emptyState.setVisible(true);
+                emptyState.setManaged(true);
+            }
+
+            System.out.println("Empty state configured successfully");
+        } catch (Exception e) {
+            System.err.println("Error setting empty state: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void hideEmptyState() {
+        emptyState.setVisible(false);
+        emptyState.setManaged(false);
+    }
+
+    private void buildTimelineGraph(InvoiceDetailDto previous, InvoiceDetailDto current, InvoiceDetailDto next) {
+        timelineGraphPane.getChildren().clear();
+
+        if (current == null) {
+            return;
+        }
+
+        double paneWidth = timelineGraphPane.getWidth();
+        if (paneWidth == 0) paneWidth = 600;
+
+        double paneHeight = timelineGraphPane.getHeight();
+        if (paneHeight == 0) paneHeight = 120;
+
+        double x1 = paneWidth * 0.15;
+        double x2 = paneWidth * 0.5;
+        double x3 = paneWidth * 0.85;
+
+        positionMonthLabels(x1, x2, x3);
+
+        double previousAmount = previous != null ? previous.getTotalAmount() : 0.0;
+        double currentAmount = current.getTotalAmount();
+        double nextAmount = next != null ? next.getTotalAmount() : 0.0;
+
+        double maxAmount = Math.max(previousAmount, Math.max(currentAmount, nextAmount));
+        if (maxAmount == 0) maxAmount = 100;
+
+        double baseY = paneHeight * 0.7;
+        double y1 = calculateYPosition(previousAmount, maxAmount, baseY);
+        double y2 = calculateYPosition(currentAmount, maxAmount, baseY);
+        double y3 = calculateYPosition(nextAmount, maxAmount, baseY);
+
+        Path path = new Path();
+        path.setStroke(Paint.valueOf("#BDBDBD"));
+        path.setStrokeWidth(3);
+        path.setFill(null);
+
+        MoveTo moveTo = new MoveTo(x1, y1);
+
+        CubicCurveTo curve1 = new CubicCurveTo();
+        curve1.setControlX1(x1 + (x2 - x1) * 0.5);
+        curve1.setControlY1(y1);
+        curve1.setControlX2(x1 + (x2 - x1) * 0.5);
+        curve1.setControlY2(y2);
+        curve1.setX(x2);
+        curve1.setY(y2);
+
+        CubicCurveTo curve2 = new CubicCurveTo();
+        curve2.setControlX1(x2 + (x3 - x2) * 0.5);
+        curve2.setControlY1(y2);
+        curve2.setControlX2(x2 + (x3 - x2) * 0.5);
+        curve2.setControlY2(y3);
+        curve2.setX(x3);
+        curve2.setY(y3);
+
+        path.getElements().addAll(moveTo, curve1, curve2);
+        timelineGraphPane.getChildren().add(path);
+
+        boolean previousPaid = previous != null && previous.getIsPaid();
+        addInvoicePoint(x1, y1, previousPaid, 16, "#2E7D32", previous);
+        addInvoicePoint(x2, y2, false, 20, "#7B1FA2", current);
+        addInvoicePoint(x3, y3, false, 16, "#9E9E9E", next);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(600), timelineGraphPane);
+        fade.setFromValue(0.0);
+        fade.setToValue(1.0);
+        fade.play();
+    }
+
+    private double calculateYPosition(double value, double maxValue, double baseY) {
+        double normalized = value / maxValue;
+        double range = 60;
+        return baseY - (normalized * range);
+    }
+
+    private void addInvoicePoint(double x, double y, boolean isPaid, double size, String color, InvoiceDetailDto invoice) {
+        boolean isCurrentInvoice = invoice != null && timelineData.getCurrentInvoice() != null
+            && invoice.getId().equals(timelineData.getCurrentInvoice().getId());
+
+        double circleSize = isCurrentInvoice ? size + 4 : size;
+        double borderWidth = isCurrentInvoice ? 4 : 3;
+
+        Circle outerCircle = new Circle(x, y, circleSize + 4);
+        outerCircle.setFill(Paint.valueOf("#FFFFFF"));
+        outerCircle.setStroke(Paint.valueOf(color));
+        outerCircle.setStrokeWidth(borderWidth);
+
+        Circle innerCircle = new Circle(x, y, circleSize);
+        innerCircle.setFill(Paint.valueOf(color));
+
+        timelineGraphPane.getChildren().addAll(outerCircle, innerCircle);
+
+        if (isCurrentInvoice) {
+            selectedOuterCircle = outerCircle;
+            selectedInnerCircle = innerCircle;
+            DropShadow selectedGlow = new DropShadow();
+            selectedGlow.setColor(javafx.scene.paint.Color.web(color));
+            selectedGlow.setRadius(20);
+            selectedGlow.setSpread(0.3);
+            outerCircle.setEffect(selectedGlow);
+        }
+
+        FontAwesomeIconView icon = new FontAwesomeIconView();
+        if (isPaid) {
+            icon.setGlyphName("CHECK");
+        } else {
+            icon.setGlyphName("FILE_TEXT");
+        }
+        icon.setFill(Paint.valueOf("#FFFFFF"));
+        icon.setSize(String.valueOf(circleSize * 0.8));
+        icon.setLayoutX(x - circleSize * 0.4);
+        icon.setLayoutY(y + circleSize * 0.3);
+
+        timelineGraphPane.getChildren().add(icon);
+
+        DropShadow glow = new DropShadow();
+        glow.setColor(javafx.scene.paint.Color.web(color));
+        glow.setRadius(12);
+
+        outerCircle.setOnMouseEntered(e -> {
+            if (!isCurrentInvoice) {
+                outerCircle.setEffect(glow);
+            }
+            outerCircle.setCursor(Cursor.HAND);
+        });
+
+        outerCircle.setOnMouseExited(e -> {
+            if (!isCurrentInvoice) {
+                outerCircle.setEffect(null);
+            }
+        });
+
+        if (invoice != null) {
+            outerCircle.setOnMouseClicked(e -> {
+                selectInvoice(invoice, outerCircle, innerCircle, color);
+            });
+            innerCircle.setOnMouseClicked(e -> {
+                selectInvoice(invoice, outerCircle, innerCircle, color);
+            });
+            icon.setOnMouseClicked(e -> {
+                selectInvoice(invoice, outerCircle, innerCircle, color);
+            });
+        }
+    }
+
+    private void selectInvoice(InvoiceDetailDto invoice, Circle outerCircle, Circle innerCircle, String color) {
+        if (selectedOuterCircle != null) {
+            selectedOuterCircle.setStrokeWidth(3);
+            selectedOuterCircle.setEffect(null);
+            animateCircleResize(selectedOuterCircle, selectedOuterCircle.getRadius(), selectedOuterCircle.getRadius() - 4);
+            animateCircleResize(selectedInnerCircle, selectedInnerCircle.getRadius(), selectedInnerCircle.getRadius() - 4);
+        }
+
+        selectedOuterCircle = outerCircle;
+        selectedInnerCircle = innerCircle;
+
+        outerCircle.setStrokeWidth(4);
+        animateCircleResize(outerCircle, outerCircle.getRadius(), outerCircle.getRadius() + 4);
+        animateCircleResize(innerCircle, innerCircle.getRadius(), innerCircle.getRadius() + 4);
+
+        DropShadow selectedGlow = new DropShadow();
+        selectedGlow.setColor(javafx.scene.paint.Color.web(color));
+        selectedGlow.setRadius(20);
+        selectedGlow.setSpread(0.3);
+        outerCircle.setEffect(selectedGlow);
+
+        Label correspondingLabel = getMonthLabelForInvoice(invoice);
+        if (correspondingLabel != null) {
+            updateMonthLabelsStyle(correspondingLabel);
+        }
+
+        loadInvoiceDetails(invoice);
+    }
+
+    private Label getMonthLabelForInvoice(InvoiceDetailDto invoice) {
+        if (invoice == null || timelineData == null) return null;
+
+        if (timelineData.getPreviousInvoice() != null && invoice.getId().equals(timelineData.getPreviousInvoice().getId())) {
+            return previousMonthLabel;
+        } else if (timelineData.getCurrentInvoice() != null && invoice.getId().equals(timelineData.getCurrentInvoice().getId())) {
+            return currentMonthLabel;
+        } else if (timelineData.getNextInvoice() != null && invoice.getId().equals(timelineData.getNextInvoice().getId())) {
+            return nextMonthLabel;
+        }
+
+        return null;
+    }
+
+    private void animateCircleResize(Circle circle, double fromRadius, double toRadius) {
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(200),
+                new javafx.animation.KeyValue(circle.radiusProperty(), toRadius, javafx.animation.Interpolator.EASE_OUT)
+            )
+        );
+        timeline.play();
+    }
+
+    private void loadInvoiceDetails(InvoiceDetailDto invoice) {
+        if (invoice == null) return;
+
+        System.out.println("Loading invoice details: " + invoice.getClosingDate());
+        loadCurrentInvoiceDetails(invoice);
+        loadPurchaseInstallments(invoice.getInstallments());
+    }
+
+    private void positionMonthLabels(double x1, double x2, double x3) {
+        javafx.application.Platform.runLater(() -> {
+            if (previousMonthLabel != null) {
+                double width1 = previousMonthLabel.getWidth() > 0 ? previousMonthLabel.getWidth() : 30;
+                previousMonthLabel.setLayoutX(x1 - width1 / 2);
+            }
+            if (currentMonthLabel != null) {
+                double width2 = currentMonthLabel.getWidth() > 0 ? currentMonthLabel.getWidth() : 30;
+                currentMonthLabel.setLayoutX(x2 - width2 / 2);
+            }
+            if (nextMonthLabel != null) {
+                double width3 = nextMonthLabel.getWidth() > 0 ? nextMonthLabel.getWidth() : 30;
+                nextMonthLabel.setLayoutX(x3 - width3 / 2);
+            }
+        });
+    }
+
+    private void updateTimelineLabels(InvoiceDetailDto previous, InvoiceDetailDto current, InvoiceDetailDto next) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM.", Locale.forLanguageTag("pt-BR"));
+
+        if (previous != null) {
+            previousInvoiceAmount.setText(formatCurrency(previous.getTotalAmount()));
+            previousMonthLabel.setText(previous.getClosingDate().format(formatter));
+        } else {
+            previousInvoiceAmount.setText("R$ 0,00");
+            previousMonthLabel.setText("-");
+        }
+
+        currentInvoiceAmount.setText(formatCurrency(current.getTotalAmount()));
+        currentMonthLabel.setText(current.getClosingDate().format(formatter));
+
+        if (next != null) {
+            nextInvoiceAmount.setText(formatCurrency(next.getTotalAmount()));
+            nextMonthLabel.setText(next.getClosingDate().format(formatter));
+        } else {
+            nextInvoiceAmount.setText("R$ 0,00");
+            nextMonthLabel.setText("-");
+        }
+
+        double paneWidth = timelineGraphPane.getWidth();
+        if (paneWidth == 0) paneWidth = 600;
+        double x1 = paneWidth * 0.15;
+        double x2 = paneWidth * 0.5;
+        double x3 = paneWidth * 0.85;
+        positionMonthLabels(x1, x2, x3);
+
+        setupMonthClickHandlers(previous, current, next);
+        updateMonthLabelsStyle(currentMonthLabel);
+    }
+
+    private void setupMonthClickHandlers(InvoiceDetailDto previous, InvoiceDetailDto current, InvoiceDetailDto next) {
+        if (previous != null) {
+            previousMonthLabel.setCursor(Cursor.HAND);
+            previousMonthLabel.setOnMouseClicked(e -> selectInvoiceByMonth(previous, previousMonthLabel));
+            previousMonthLabel.setOnMouseEntered(e -> {
+                if (selectedMonthLabel != previousMonthLabel) {
+                    previousMonthLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #2E7D32; -fx-underline: true;");
+                }
+            });
+            previousMonthLabel.setOnMouseExited(e -> {
+                if (selectedMonthLabel != previousMonthLabel) {
+                    previousMonthLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #757575;");
+                }
+            });
+        } else {
+            previousMonthLabel.setCursor(Cursor.DEFAULT);
+            previousMonthLabel.setOnMouseClicked(null);
+            previousMonthLabel.setOnMouseEntered(null);
+            previousMonthLabel.setOnMouseExited(null);
+        }
+
+        if (current != null) {
+            currentMonthLabel.setCursor(Cursor.HAND);
+            currentMonthLabel.setOnMouseClicked(e -> selectInvoiceByMonth(current, currentMonthLabel));
+            currentMonthLabel.setOnMouseEntered(e -> {
+                if (selectedMonthLabel != currentMonthLabel) {
+                    currentMonthLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #7B1FA2; -fx-underline: true;");
+                }
+            });
+            currentMonthLabel.setOnMouseExited(e -> {
+                if (selectedMonthLabel != currentMonthLabel) {
+                    currentMonthLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #424242;");
+                }
+            });
+        }
+
+        if (next != null) {
+            nextMonthLabel.setCursor(Cursor.HAND);
+            nextMonthLabel.setOnMouseClicked(e -> selectInvoiceByMonth(next, nextMonthLabel));
+            nextMonthLabel.setOnMouseEntered(e -> {
+                if (selectedMonthLabel != nextMonthLabel) {
+                    nextMonthLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #9E9E9E; -fx-underline: true;");
+                }
+            });
+            nextMonthLabel.setOnMouseExited(e -> {
+                if (selectedMonthLabel != nextMonthLabel) {
+                    nextMonthLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #757575;");
+                }
+            });
+        } else {
+            nextMonthLabel.setCursor(Cursor.DEFAULT);
+            nextMonthLabel.setOnMouseClicked(null);
+            nextMonthLabel.setOnMouseEntered(null);
+            nextMonthLabel.setOnMouseExited(null);
+        }
+    }
+
+    private void selectInvoiceByMonth(InvoiceDetailDto invoice, Label monthLabel) {
+        if (invoice == null) return;
+
+        updateMonthLabelsStyle(monthLabel);
+        loadInvoiceDetails(invoice);
+
+        timelineData.setCurrentInvoice(invoice);
+        buildTimelineGraph(timelineData.getPreviousInvoice(), invoice, timelineData.getNextInvoice());
+    }
+
+    private void updateMonthLabelsStyle(Label selectedLabel) {
+        selectedMonthLabel = selectedLabel;
+
+        if (previousMonthLabel != null && timelineData != null && timelineData.getPreviousInvoice() != null) {
+            if (selectedLabel == previousMonthLabel) {
+                previousMonthLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #2E7D32; -fx-background-color: rgba(46, 125, 50, 0.1); -fx-background-radius: 8; -fx-padding: 4 8;");
+            } else {
+                previousMonthLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #757575;");
+            }
+        }
+
+        if (currentMonthLabel != null && timelineData != null && timelineData.getCurrentInvoice() != null) {
+            if (selectedLabel == currentMonthLabel) {
+                currentMonthLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #7B1FA2; -fx-background-color: rgba(123, 31, 162, 0.1); -fx-background-radius: 8; -fx-padding: 4 8;");
+            } else {
+                currentMonthLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #424242;");
+            }
+        }
+
+        if (nextMonthLabel != null && timelineData != null && timelineData.getNextInvoice() != null) {
+            if (selectedLabel == nextMonthLabel) {
+                nextMonthLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #616161; -fx-background-color: rgba(158, 158, 158, 0.1); -fx-background-radius: 8; -fx-padding: 4 8;");
+            } else {
+                nextMonthLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #757575;");
+            }
+        }
+    }
+
+    private void loadCurrentInvoiceDetails(InvoiceDetailDto invoice) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd 'de' MMMM", Locale.forLanguageTag("pt-BR"));
+        dueDateLabel.setText(invoice.getDueDate().format(dateFormatter));
+        closingDateLabel.setText(invoice.getClosingDate().format(dateFormatter));
+        installmentsTotalLabel.setText(formatCurrency(invoice.getTotalAmount()));
+    }
+
+    private void loadPurchaseInstallments(List<PurchaseInstallmentDto> installments) {
+        installmentsList.getChildren().clear();
+
+        if (installments == null || installments.isEmpty()) {
+            showEmptyState();
+            return;
+        }
+
+        emptyState.setVisible(false);
+        emptyState.setManaged(false);
+
+        for (PurchaseInstallmentDto installment : installments) {
+            VBox card = createInstallmentCard(installment);
+            installmentsList.getChildren().add(card);
+        }
+    }
+
+    private VBox createInstallmentCard(PurchaseInstallmentDto installment) {
+        VBox card = new VBox(8);
+        card.getStyleClass().add("card");
+        card.setStyle("-fx-padding: 16; -fx-cursor: hand;");
+
+        HBox header = new HBox(12);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        FontAwesomeIconView icon = new FontAwesomeIconView();
+        icon.setGlyphName(getCategoryIcon(installment.getCategory()));
+        icon.setSize("24");
+        icon.setFill(Paint.valueOf("#1565C0"));
+
+        VBox merchantInfo = new VBox(2);
+        Label merchantLabel = new Label(installment.getMerchant() != null ? installment.getMerchant() : "Compra");
+        merchantLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #212121;");
+
+        if (installment.getPurchaseDate() != null) {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.forLanguageTag("pt-BR"));
+            Label dateLabel = new Label(installment.getPurchaseDate().format(dateFormatter));
+            dateLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #757575;");
+            merchantInfo.getChildren().addAll(merchantLabel, dateLabel);
+        } else {
+            merchantInfo.getChildren().add(merchantLabel);
+        }
+
+        HBox.setHgrow(merchantInfo, javafx.scene.layout.Priority.ALWAYS);
+
+        Label amountLabel = new Label(formatCurrency(installment.getInstallmentAmount()));
+        amountLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #212121;");
+
+        header.getChildren().addAll(icon, merchantInfo, amountLabel);
+
+        HBox details = new HBox();
+        details.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        javafx.scene.layout.HBox.setHgrow(details, javafx.scene.layout.Priority.ALWAYS);
+
+        String installmentInfo = installment.getTotalInstallments() > 1 ?
+                String.format("Parcela %d/%d - Total: %s",
+                        installment.getInstallmentNumber(),
+                        installment.getTotalInstallments(),
+                        formatCurrency(installment.getTotalAmount())) :
+                "À vista";
+
+        Label installmentLabel = new Label(installmentInfo);
+        installmentLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #616161;");
+
+        HBox.setHgrow(installmentLabel, javafx.scene.layout.Priority.ALWAYS);
+
+        details.getChildren().add(installmentLabel);
+
+        card.getChildren().addAll(header, details);
+        return card;
+    }
+
+    private String getCategoryIcon(PurchaseCategory category) {
+        if (category == null) return "SHOPPING_CART";
+        return switch (category) {
+            case FOOD -> "CUTLERY";
+            case TRANSPORT -> "CAR";
+            case HEALTH -> "HEART";
+            case EDUCATION -> "BOOK";
+            case ENTERTAINMENT -> "PLAY_CIRCLE";
+            case OTHER -> "SHOPPING_CART";
+            default -> "SHOPPING_CART";
+        };
+    }
+
+    private String getStatusText(String status) {
+        return switch (status) {
+            case "PAID" -> "Paga";
+            case "PENDING" -> "Pendente";
+            case "OVERDUE" -> "Atrasada";
+            default -> status;
+        };
+    }
+
+    private String getStatusStyle(String status) {
+        String baseStyle = "-fx-font-size: 12px; -fx-font-weight: 600; -fx-padding: 4 12; -fx-background-radius: 12; ";
+        return switch (status) {
+            case "PAID" -> baseStyle + "-fx-background-color: #E8F5E9; -fx-text-fill: #2E7D32;";
+            case "PENDING" -> baseStyle + "-fx-background-color: #FFF3E0; -fx-text-fill: #F57C00;";
+            case "OVERDUE" -> baseStyle + "-fx-background-color: #FFEBEE; -fx-text-fill: #D32F2F;";
+            default -> baseStyle + "-fx-background-color: #F5F5F5; -fx-text-fill: #616161;";
+        };
+    }
+
+    private void showEmptyState() {
+        System.out.println("showEmptyState() called");
+        installmentsList.getChildren().clear();
+        emptyState.setVisible(true);
+        emptyState.setManaged(true);
+
+        yearLabel.setText("Sem Faturas");
+        previousInvoiceAmount.setText("R$ 0,00");
+        currentInvoiceAmount.setText("R$ 0,00");
+        nextInvoiceAmount.setText("R$ 0,00");
+        previousMonthLabel.setText("-");
+        currentMonthLabel.setText("-");
+        nextMonthLabel.setText("-");
+        dueDateLabel.setText("-");
+        closingDateLabel.setText("-");
+        installmentsTotalLabel.setText("R$ 0,00");
+    }
+
+    private String formatCurrency(Double value) {
+        if (value == null) return "R$ 0,00";
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+        return formatter.format(value);
+    }
+
+    @FXML
+    private void handleBack() {
+        if (userId != null) {
+            ViewSwitcher.switchTo(CreditCardView.HOME.getView(), new org.jala.university.presentation.context.UserContext(userId));
+        } else {
+            ViewSwitcher.switchTo(CreditCardView.HOME.getView());
+        }
+    }
+
+    @FXML
+    private void handleDownload() {
+        if (timelineData == null || timelineData.getCurrentInvoice() == null) {
+            showErrorMessage("Nenhuma fatura disponível para download");
+            return;
+        }
+
+        try {
+            javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+            fileChooser.setTitle("Salvar Extrato da Fatura");
+            fileChooser.setInitialFileName("extrato_fatura_" +
+                timelineData.getCurrentInvoice().getClosingDate().format(
+                    DateTimeFormatter.ofPattern("yyyy_MM")) + ".txt");
+            fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("Arquivo de Texto", "*.txt"));
+
+            java.io.File file = fileChooser.showSaveDialog(installmentsList.getScene().getWindow());
+
+            if (file != null) {
+                String content = generateInvoiceReport(timelineData.getCurrentInvoice());
+                java.nio.file.Files.writeString(file.toPath(), content);
+                showSuccessMessage("Extrato salvo com sucesso!");
+                System.out.println("Invoice downloaded to: " + file.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            showErrorMessage("Erro ao salvar extrato: " + e.getMessage());
+            System.err.println("Error downloading invoice: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String generateInvoiceReport(InvoiceDetailDto invoice) {
+        StringBuilder report = new StringBuilder();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.forLanguageTag("pt-BR"));
+
+        report.append("=".repeat(60)).append("\n");
+        report.append("               EXTRATO DE FATURA - CARTÃO DE CRÉDITO\n");
+        report.append("=".repeat(60)).append("\n\n");
+
+        report.append("Data de Fechamento: ").append(invoice.getClosingDate().format(dateFormatter)).append("\n");
+        report.append("Data de Vencimento: ").append(invoice.getDueDate().format(dateFormatter)).append("\n");
+        report.append("Valor Total: ").append(formatCurrency(invoice.getTotalAmount())).append("\n");
+        report.append("Status: ").append(invoice.getIsPaid() ? "PAGA" : "EM ABERTO").append("\n\n");
+
+        report.append("-".repeat(60)).append("\n");
+        report.append("                    COMPRAS E PARCELAS\n");
+        report.append("-".repeat(60)).append("\n\n");
+
+        if (invoice.getInstallments() != null && !invoice.getInstallments().isEmpty()) {
+            for (PurchaseInstallmentDto installment : invoice.getInstallments()) {
+                report.append("Estabelecimento: ").append(installment.getMerchant() != null ? installment.getMerchant() : "N/A").append("\n");
+
+                if (installment.getPurchaseDate() != null) {
+                    report.append("Data da Compra: ").append(installment.getPurchaseDate().format(dateFormatter)).append("\n");
+                }
+
+                report.append("Descrição: ").append(installment.getDescription() != null ? installment.getDescription() : "N/A").append("\n");
+                report.append("Categoria: ").append(installment.getCategory() != null ? installment.getCategory().name() : "N/A").append("\n");
+
+                if (installment.getTotalInstallments() > 1) {
+                    report.append("Parcela: ").append(installment.getInstallmentNumber())
+                          .append("/").append(installment.getTotalInstallments()).append("\n");
+                    report.append("Valor Total: ").append(formatCurrency(installment.getTotalAmount())).append("\n");
+                    report.append("Valor da Parcela: ").append(formatCurrency(installment.getInstallmentAmount())).append("\n");
+                } else {
+                    report.append("Tipo: À vista\n");
+                    report.append("Valor: ").append(formatCurrency(installment.getInstallmentAmount())).append("\n");
+                }
+
+                report.append("Status: ").append(getStatusText(installment.getStatus().name())).append("\n");
+                report.append("\n");
+            }
+        } else {
+            report.append("Nenhuma compra registrada nesta fatura.\n\n");
+        }
+
+        report.append("=".repeat(60)).append("\n");
+        report.append("TOTAL DA FATURA: ").append(formatCurrency(invoice.getTotalAmount())).append("\n");
+        report.append("=".repeat(60)).append("\n");
+
+        return report.toString();
+    }
+
+    private void showSuccessMessage(String message) {
+        System.out.println("SUCCESS: " + message);
+    }
+
+    private void showErrorMessage(String message) {
+        System.err.println("ERROR: " + message);
+    }
+
+    @FXML
+    private void handleShare() {
+        System.out.println("Share invoice");
+    }
+
+    @FXML
+    private void handlePayFullInvoice() {
+        System.out.println("Pay full invoice");
+    }
+
+    @FXML
+    private void handleInstallPurchase() {
+        System.out.println("Install purchase");
+    }
+
+    @FXML
+    private void handleAnticipatePix() {
+        System.out.println("Anticipate via PIX");
+    }
+
+    @FXML
+    private void handleProtectCard() {
+        System.out.println("Protect card");
+    }
+
+    @FXML
+    private void handleBarcode() {
+        System.out.println("Show barcode");
+    }
+}

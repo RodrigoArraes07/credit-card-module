@@ -17,6 +17,7 @@ import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
 import org.jala.university.presentation.CreditCardView;
+import org.jala.university.presentation.context.CardUpdateContext;
 import org.jala.university.presentation.context.UserContext;
 
 import java.text.NumberFormat;
@@ -256,7 +257,18 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleAdjustLimit() {
-        System.out.println("Adjust limit clicked");
+        if (userId == null || userCards == null || userCards.isEmpty()) {
+            System.err.println("User ID or cards not available");
+            return;
+        }
+
+        CreditCardDto currentCard = userCards.get(currentCardIndex);
+        CardUpdateContext context = new CardUpdateContext(
+            userId,
+            currentCard.getCardNumber(),
+            currentCard.getMaskCardNumber()
+        );
+        ViewSwitcher.switchTo(CreditCardView.CARD_UPDATE.getView(), context);
     }
 
     @FXML
