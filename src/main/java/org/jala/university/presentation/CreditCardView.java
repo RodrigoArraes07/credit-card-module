@@ -9,6 +9,7 @@ public enum CreditCardView {
     HOME("home-view.fxml"),
     CARD_TYPE_SELECTION("card-type-selection-view.fxml"),
     REQUEST_CARD("credit-card-request-view.fxml"),
+    CARD_UPDATE("card-update-view.fxml"),
     MAIN("main-view.fxml");
 
     private final View view;

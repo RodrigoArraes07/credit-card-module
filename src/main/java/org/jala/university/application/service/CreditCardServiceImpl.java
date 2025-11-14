@@ -4,13 +4,18 @@ import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.dto.CreditCardUpdateDto;
+import org.jala.university.application.dto.CreditCardUpdateResponseDto;
 import org.jala.university.application.mapper.CreditCardMapper;
 import org.jala.university.domain.entity.CreditCard;
+import org.jala.university.domain.entity.Invoice;
 import org.jala.university.domain.entity.User;
 import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.repository.CreditCardRepository;
+import org.jala.university.domain.repository.InvoiceRepository;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Random;
@@ -20,6 +25,7 @@ import java.util.UUID;
 public class CreditCardServiceImpl implements CreditCardService {
     private CreditCardRepository creditCardRepository;
     private CreditCardMapper creditCardMapper;
+    private InvoiceRepository invoiceRepository;
 
     @Override
     public List<CreditCardDto> findAll() {
@@ -40,6 +46,12 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
+    public CreditCardDto findByCardNumber(String cardNumber) {
+        CreditCard card = creditCardRepository.findByCardNumber(cardNumber);
+        return card != null ? creditCardMapper.mapTo(card) : null;
+    }
+
+    @Override
     public CreditCardDto create(CreditCard creditCard) {
         return null;
     }
@@ -51,7 +63,6 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public void deleteById(UUID id) {
-        // TODO: implements
     }
 
     @Override
@@ -147,6 +158,85 @@ public class CreditCardServiceImpl implements CreditCardService {
         return CreditCardResponseDto.builder()
                 .message(message)
                 .status(CreditCardStatus.BLOCKED)
+                .build();
+    }
+
+    @Override
+    public CreditCardUpdateResponseDto updateCreditCardSettings(CreditCardUpdateDto updateDto) {
+        try {
+            CreditCard creditCard = creditCardRepository.findByCardNumber(updateDto.getCardNumber());
+            if (creditCard == null) {
+                return buildUpdateErrorResponse("Cartão não encontrado.");
+            }
+
+            if (updateDto.getPassword() == null || !creditCard.getPasswordHash().equals(updateDto.getPassword())) {
+                return buildUpdateErrorResponse("Senha incorreta.");
+            }
+
+            if (updateDto.getNewLimitAmount() == null && updateDto.getNewDueDay() == null) {
+                return buildUpdateErrorResponse("Informe ao menos limite ou dia de vencimento para alterar.");
+            }
+
+            boolean limitUpdated = false;
+            boolean dueDateUpdated = false;
+            int affectedInvoices = 0;
+
+            if (updateDto.getNewLimitAmount() != null) {
+                if (!isValidLimit(updateDto.getNewLimitAmount(), creditCard.getMaxLimit())) {
+                    return buildUpdateErrorResponse("Limite inválido. Deve ser >= 50 e <= " + creditCard.getMaxLimit());
+                }
+                creditCard.setLimitAmount(updateDto.getNewLimitAmount());
+                limitUpdated = true;
+            }
+
+            if (updateDto.getNewDueDay() != null) {
+                if (!isValidDueDay(updateDto.getNewDueDay())) {
+                    return buildUpdateErrorResponse("Dia de vencimento inválido. Use múltiplos de 5 (5, 10, 15, 20, 25, 30).");
+                }
+
+                List<Invoice> futureInvoices = invoiceRepository.findFutureInvoicesByCreditCard(creditCard, LocalDate.now());
+                int requestedDay = updateDto.getNewDueDay();
+                for (Invoice invoice : futureInvoices) {
+                    int lastDay = invoice.getDueDate().lengthOfMonth();
+                    int effectiveDay = Math.min(requestedDay, lastDay);
+                    LocalDate newDueDate = invoice.getDueDate().withDayOfMonth(effectiveDay);
+                    invoice.setDueDate(newDueDate);
+                    invoiceRepository.save(invoice);
+                    affectedInvoices++;
+                }
+                dueDateUpdated = true;
+            }
+
+            if (limitUpdated) {
+                creditCardRepository.save(creditCard);
+            }
+
+            return CreditCardUpdateResponseDto.builder()
+                    .maskCardNumber(creditCard.getMaskCardNumber())
+                    .updatedLimit(limitUpdated ? creditCard.getLimitAmount() : null)
+                    .updatedDueDay(dueDateUpdated ? updateDto.getNewDueDay() : null)
+                    .affectedInvoices(affectedInvoices)
+                    .message("Cartão atualizado com sucesso!")
+                    .success(true)
+                    .build();
+
+        } catch (Exception e) {
+            return buildUpdateErrorResponse("Erro ao atualizar cartão: " + e.getMessage());
+        }
+    }
+
+    private boolean isValidLimit(Double newLimit, Double maxLimit) {
+        return newLimit != null && newLimit >= 50 && newLimit <= maxLimit;
+    }
+
+    private boolean isValidDueDay(Integer dueDay) {
+        return dueDay != null && dueDay % 5 == 0 && dueDay >= 5 && dueDay <= 30;
+    }
+
+    private CreditCardUpdateResponseDto buildUpdateErrorResponse(String message) {
+        return CreditCardUpdateResponseDto.builder()
+                .message(message)
+                .success(false)
                 .build();
     }
 }
