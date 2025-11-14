@@ -2,14 +2,11 @@ package org.jala.university.presentation.controller;
 
 import jakarta.persistence.EntityManager;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.dto.UserCreateDto;
@@ -81,6 +78,18 @@ public class CreditCardRequestController extends BaseController {
         this.selectedCardType = cardType;
     }
 
+    @Override
+    public void setContext(org.jala.university.commons.presentation.ViewContext context) {
+        super.setContext(context);
+        if (context instanceof org.jala.university.presentation.context.CardTypeContext) {
+            org.jala.university.presentation.context.CardTypeContext cardTypeContext =
+                (org.jala.university.presentation.context.CardTypeContext) context;
+            setSelectedCardType(cardTypeContext.getCardType());
+            if (creditCardService == null) {
+                creditCardService = org.jala.university.infrastructure.config.AppConfig.getInstance().getCreditCardService();
+            }
+        }
+    }
 
     @FXML
     private void initialize() {
@@ -88,18 +97,9 @@ public class CreditCardRequestController extends BaseController {
 
     @FXML
     private void handleBack() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/card-type-selection-view.fxml")
-            );
-            Parent root = loader.load();
-
-            Stage stage = (Stage) nameField.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (Exception e) {
-            System.err.println("Error loading card type selection view: " + e.getMessage());
-            e.printStackTrace();
-        }
+        org.jala.university.commons.presentation.ViewSwitcher.switchTo(
+            org.jala.university.presentation.CreditCardView.CARD_TYPE_SELECTION.getView()
+        );
     }
 
     @FXML
@@ -318,21 +318,9 @@ public class CreditCardRequestController extends BaseController {
     }
 
     private void navigateToLogin() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/login-view.fxml")
-            );
-            Parent root = loader.load();
-
-            LoginController controller = loader.getController();
-            controller.setUserService(AppConfig.getInstance().getUserService());
-
-            Stage stage = (Stage) nameField.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (Exception e) {
-            System.err.println("Error loading login view: " + e.getMessage());
-            e.printStackTrace();
-        }
+        org.jala.university.commons.presentation.ViewSwitcher.switchTo(
+            org.jala.university.presentation.CreditCardView.LOGIN.getView()
+        );
     }
 
 }

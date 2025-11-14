@@ -1,36 +1,44 @@
 package org.jala.university.application.mapper;
 
-import org.jala.university.domain.entity.Purchase;
-import org.jala.university.domain.entity.CreditCard;
-import org.jala.university.domain.enums.PurchaseCategory;
 import org.jala.university.application.dto.PurchaseDto;
+import org.jala.university.commons.application.mapper.Mapper;
+import org.jala.university.domain.entity.Purchase;
+import org.jala.university.domain.enums.PurchaseCategory;
 
-/**
- * Mapper para converter Purchase <-> PurchaseDto.
- *
- * @author Hudson Silva
- * @version 1.0
- */
-public class PurchaseMapper {
+public class PurchaseMapper implements Mapper<Purchase, PurchaseDto> {
 
-    public static PurchaseDto toDto(Purchase purchase) {
-        if (purchase == null) return null;
+    private static PurchaseMapper instance;
+
+    private PurchaseMapper() {}
+
+    public static PurchaseMapper getInstance() {
+        if (instance == null) {
+            instance = new PurchaseMapper();
+        }
+        return instance;
+    }
+
+    @Override
+    public PurchaseDto mapTo(Purchase entity) {
+        if (entity == null) {
+            return null;
+        }
         return PurchaseDto.builder()
-                .merchant(purchase.getMerchant())
-                .description(purchase.getDescription())
-                .totalAmount(purchase.getTotalAmount())
-                .purchaseDate(purchase.getPurchaseDate())
-                .totalInstallments(purchase.getTotalInstallments())
-                .category(
-                        purchase.getCategory() != null ? purchase.getCategory().name() : null
-                )
+                .merchant(entity.getMerchant())
+                .description(entity.getDescription())
+                .totalAmount(entity.getTotalAmount())
+                .purchaseDate(entity.getPurchaseDate())
+                .totalInstallments(entity.getTotalInstallments())
+                .category(entity.getCategory() != null ? entity.getCategory().name() : null)
                 .build();
     }
 
-    public static Purchase toEntity(PurchaseDto dto, CreditCard creditCard) {
-        if (dto == null) return null;
+    @Override
+    public Purchase mapFrom(PurchaseDto dto) {
+        if (dto == null) {
+            return null;
+        }
         return Purchase.builder()
-                .creditCard(creditCard)
                 .merchant(dto.getMerchant())
                 .description(dto.getDescription())
                 .totalAmount(dto.getTotalAmount())

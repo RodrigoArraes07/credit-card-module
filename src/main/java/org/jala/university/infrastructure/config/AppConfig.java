@@ -5,16 +5,27 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.jala.university.application.mapper.CreditCardMapper;
+import org.jala.university.application.mapper.InvoiceMapper;
+import org.jala.university.application.mapper.PurchaseInstallmentMapper;
+import org.jala.university.application.mapper.PurchaseMapper;
 import org.jala.university.application.mapper.UserMapper;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.CreditCardServiceImpl;
+import org.jala.university.application.service.InvoiceService;
+import org.jala.university.application.service.InvoiceServiceImpl;
+import org.jala.university.application.service.PurchaseService;
+import org.jala.university.application.service.PurchaseServiceImpl;
 import org.jala.university.application.service.UserService;
 import org.jala.university.application.service.UserServiceImpl;
 import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.domain.repository.InvoiceRepository;
+import org.jala.university.domain.repository.PurchaseInstallmentRepository;
+import org.jala.university.domain.repository.PurchaseRepository;
 import org.jala.university.domain.repository.UserRepository;
 import org.jala.university.infrastructure.persistence.CreditCardRepositoryImpl;
 import org.jala.university.infrastructure.persistence.InvoiceRepositoryImpl;
+import org.jala.university.infrastructure.persistence.PurchaseInstallmentRepositoryImpl;
+import org.jala.university.infrastructure.persistence.PurchaseRepositoryImpl;
 import org.jala.university.infrastructure.persistence.UserRepositoryImpl;
 
 import java.util.HashMap;
@@ -27,8 +38,12 @@ public class AppConfig {
     private final EntityManager entityManager;
     private final CreditCardRepository creditCardRepository;
     private final InvoiceRepository invoiceRepository;
-    private final CreditCardService creditCardService;
+    private final PurchaseRepository purchaseRepository;
+    private final PurchaseInstallmentRepository purchaseInstallmentRepository;
     private final UserRepository userRepository;
+    private final CreditCardService creditCardService;
+    private final InvoiceService invoiceService;
+    private final PurchaseService purchaseService;
     private final UserService userService;
 
     private AppConfig() {
@@ -65,11 +80,23 @@ public class AppConfig {
         this.entityManager = entityManagerFactory.createEntityManager();
         this.creditCardRepository = new CreditCardRepositoryImpl(entityManager);
         this.invoiceRepository = new InvoiceRepositoryImpl(entityManager);
+        this.purchaseRepository = new PurchaseRepositoryImpl(entityManager);
+        this.purchaseInstallmentRepository = new PurchaseInstallmentRepositoryImpl(entityManager);
         this.userRepository = new UserRepositoryImpl(entityManager);
         this.creditCardService = new CreditCardServiceImpl(
                 creditCardRepository,
                 CreditCardMapper.getInstance(),
                 invoiceRepository
+        );
+        this.invoiceService = new InvoiceServiceImpl(
+                invoiceRepository,
+                purchaseInstallmentRepository,
+                InvoiceMapper.getInstance(),
+                PurchaseInstallmentMapper.getInstance()
+        );
+        this.purchaseService = new PurchaseServiceImpl(
+                purchaseRepository,
+                PurchaseMapper.getInstance()
         );
         this.userService = new UserServiceImpl(
                 userRepository,
@@ -92,8 +119,28 @@ public class AppConfig {
         return creditCardRepository;
     }
 
+    public InvoiceRepository getInvoiceRepository() {
+        return invoiceRepository;
+    }
+
+    public PurchaseRepository getPurchaseRepository() {
+        return purchaseRepository;
+    }
+
+    public PurchaseInstallmentRepository getPurchaseInstallmentRepository() {
+        return purchaseInstallmentRepository;
+    }
+
     public CreditCardService getCreditCardService() {
         return creditCardService;
+    }
+
+    public InvoiceService getInvoiceService() {
+        return invoiceService;
+    }
+
+    public PurchaseService getPurchaseService() {
+        return purchaseService;
     }
 
     public UserRepository getUserRepository() {

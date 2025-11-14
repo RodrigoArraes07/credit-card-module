@@ -1,23 +1,24 @@
 package org.jala.university.presentation.controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
 import org.jala.university.application.dto.CreditCardDto;
+import org.jala.university.application.dto.PurchaseDto;
 import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.CreditCardService;
+import org.jala.university.application.service.PurchaseService;
 import org.jala.university.application.service.UserService;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
 import org.jala.university.presentation.CreditCardView;
+import org.jala.university.presentation.components.TransactionCard;
 import org.jala.university.presentation.context.CardUpdateContext;
+import org.jala.university.presentation.context.InvoiceContext;
 import org.jala.university.presentation.context.UserContext;
 
 import java.text.NumberFormat;
@@ -68,6 +69,7 @@ public class HomeController extends BaseController {
     private UUID userId;
     private UserService userService;
     private CreditCardService creditCardService;
+    private PurchaseService purchaseService;
     private List<CreditCardDto> userCards;
     private int currentCardIndex = 0;
 
@@ -79,21 +81,47 @@ public class HomeController extends BaseController {
         this.creditCardService = service;
     }
 
+    public void setPurchaseService(PurchaseService service) {
+        this.purchaseService = service;
+    }
+
     @FXML
     private void initialize() {
         loadServices();
     }
 
-    public void loadData() {
-        System.out.println("HomeController.loadData() called");
-        System.out.println("Context: " + getContext());
+    @Override
+    public void setContext(org.jala.university.commons.presentation.ViewContext context) {
+        try {
+            System.out.println("HomeController.setContext() START");
+            super.setContext(context);
+            System.out.println("HomeController.setContext() - calling loadData()");
+            loadData();
+            System.out.println("HomeController.setContext() COMPLETED");
+        } catch (Exception e) {
+            System.err.println("ERROR in HomeController.setContext(): " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
-        if (getContext() instanceof UserContext ctx) {
-            userId = ctx.getUserId();
-            System.out.println("User ID: " + userId);
-            loadUserData();
-        } else {
-            System.out.println("Context is NOT UserContext!");
+    public void loadData() {
+        try {
+            System.out.println("HomeController.loadData() START");
+            System.out.println("Context: " + getContext());
+
+            if (getContext() instanceof UserContext ctx) {
+                userId = ctx.getUserId();
+                System.out.println("User ID: " + userId);
+                loadUserData();
+                System.out.println("HomeController.loadData() COMPLETED SUCCESSFULLY");
+            } else {
+                System.out.println("Context is NOT UserContext!");
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR in HomeController.loadData(): " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -103,6 +131,9 @@ public class HomeController extends BaseController {
         }
         if (creditCardService == null) {
             creditCardService = AppConfig.getInstance().getCreditCardService();
+        }
+        if (purchaseService == null) {
+            purchaseService = AppConfig.getInstance().getPurchaseService();
         }
     }
 
@@ -146,10 +177,41 @@ public class HomeController extends BaseController {
     }
 
     private void loadTransactions() {
+        if (purchaseService == null || userCards == null || userCards.isEmpty() || currentCardIndex >= userCards.size()) {
+            showEmptyTransactions();
+            return;
+        }
+
+        CreditCardDto currentCard = userCards.get(currentCardIndex);
+        List<PurchaseDto> purchases = purchaseService.findRecentByCreditCardId(currentCard.getCredit_card_id(), 5);
+
+        if (purchases == null || purchases.isEmpty()) {
+            showEmptyTransactions();
+            return;
+        }
+
+        showTransactionsWithData(purchases);
+    }
+
+    private void showEmptyTransactions() {
         transactionsContainer.setVisible(false);
         transactionsContainer.setManaged(false);
         emptyTransactionsState.setVisible(true);
         emptyTransactionsState.setManaged(true);
+    }
+
+    private void showTransactionsWithData(List<PurchaseDto> purchases) {
+        transactionsList.getChildren().clear();
+
+        for (PurchaseDto purchase : purchases) {
+            TransactionCard card = new TransactionCard(purchase);
+            transactionsList.getChildren().add(card);
+        }
+
+        transactionsContainer.setVisible(true);
+        transactionsContainer.setManaged(true);
+        emptyTransactionsState.setVisible(false);
+        emptyTransactionsState.setManaged(false);
     }
 
     private void showEmptyState() {
@@ -176,6 +238,7 @@ public class HomeController extends BaseController {
             currentCardIndex--;
             updateCarouselControls();
             updateCardDisplay();
+            loadTransactions();
         }
     }
 
@@ -185,6 +248,7 @@ public class HomeController extends BaseController {
             currentCardIndex++;
             updateCarouselControls();
             updateCardDisplay();
+            loadTransactions();
         }
     }
 
@@ -242,7 +306,14 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handlePayInvoice() {
-        System.out.println("Pay invoice clicked");
+        if (userCards == null || userCards.isEmpty() || currentCardIndex >= userCards.size()) {
+            System.out.println("No card available");
+            return;
+        }
+
+        CreditCardDto currentCard = userCards.get(currentCardIndex);
+        InvoiceContext context = new InvoiceContext(userId, currentCard.getCredit_card_id());
+        ViewSwitcher.switchTo(CreditCardView.INVOICE_MONTHLY.getView(), context);
     }
 
     @FXML
@@ -278,18 +349,7 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleRequestCard() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/card-type-selection-view.fxml")
-            );
-            Parent root = loader.load();
-
-            Stage stage = (Stage) userNameLabel.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (Exception e) {
-            System.err.println("Error loading card type selection view: " + e.getMessage());
-            e.printStackTrace();
-        }
+        ViewSwitcher.switchTo(CreditCardView.CARD_TYPE_SELECTION.getView());
     }
 
     @FXML

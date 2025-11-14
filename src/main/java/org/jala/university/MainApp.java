@@ -22,8 +22,6 @@ public final class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            System.out.println("Starting application...");
-
             AppConfig config = AppConfig.getInstance();
 
             Scene scene = new Scene(new Pane(), WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -42,8 +40,6 @@ public final class MainApp extends Application {
             primaryStage.setTitle(APPLICATION_TITLE);
             primaryStage.setOnCloseRequest(e -> config.close());
             primaryStage.show();
-
-            System.out.println("Application started successfully!");
 
         } catch (Exception e) {
             System.err.println("ERROR starting application:");
