@@ -1,10 +1,10 @@
 /target
 /.idea
-/.claude
+/.idea/.claude
 /CLAUDE.md
 .env
 src/main/java/org/jala/university/env
-.claude/
+.idea/.claude/
 database/
 .DS_Store
 *.backup
