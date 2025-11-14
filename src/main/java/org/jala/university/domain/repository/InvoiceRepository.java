@@ -1,5 +1,6 @@
 package org.jala.university.domain.repository;
 
+import org.jala.university.domain.entity.CreditCard;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.commons.domain.repository.Repository;
 
@@ -15,4 +16,5 @@ public interface InvoiceRepository extends Repository<Invoice, UUID> {
     Invoice findPreviousInvoice(UUID creditCardId, LocalDate referenceDate);
     Invoice findNextInvoice(UUID creditCardId, LocalDate referenceDate);
     List<Invoice> findByYear(UUID creditCardId, int year);
+    List<Invoice> findFutureInvoicesByCreditCard(CreditCard creditCard, LocalDate currentDate);
 }

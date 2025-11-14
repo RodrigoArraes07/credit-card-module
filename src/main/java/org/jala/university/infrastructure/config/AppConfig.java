@@ -65,7 +65,6 @@ public class AppConfig {
         String url = "jdbc:mysql://" + host + ":" + port + "/" + name;
 
         System.out.println("url: " + url);
-        // Configura o EntityManagerFactory dinamicamente com base nas variáveis de ambiente
         Map<String, String> props = new HashMap<>();
 
         props.put("jakarta.persistence.jdbc.driver", "com.mysql.cj.jdbc.Driver");
@@ -86,7 +85,8 @@ public class AppConfig {
         this.userRepository = new UserRepositoryImpl(entityManager);
         this.creditCardService = new CreditCardServiceImpl(
                 creditCardRepository,
-                CreditCardMapper.getInstance()
+                CreditCardMapper.getInstance(),
+                invoiceRepository
         );
         this.invoiceService = new InvoiceServiceImpl(
                 invoiceRepository,

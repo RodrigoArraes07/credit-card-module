@@ -22,7 +22,9 @@ public class CreditCardDto implements Serializable {
     private String maskCardNumber;
     private String holderName;
     private Double limitAmount;
+    private Double maxLimit;
     private TargetType targetType;
     private Integer cvc;
+    private String passwordHash;
     private CreditCardStatus status;
 }

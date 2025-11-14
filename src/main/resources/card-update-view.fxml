@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.jala.university.presentation.controller.CardUpdateController"
+            prefWidth="1000" prefHeight="700"
+            stylesheets="@styles/application.css"
+            style="-fx-background-color: #F5F5F5;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15"
+              style="-fx-background-color: white; -fx-padding: 18 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);">
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Circle radius="20" style="-fx-fill: #1565C0;"/>
+                <Label text="JALA Bank" styleClass="text-title"
+                       style="-fx-font-size: 18px; -fx-font-weight: 700;"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Atualizar Cartão"
+                   style="-fx-font-size: 16px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button text="Voltar" styleClass="button-secondary" onAction="#handleBack"
+                    style="-fx-pref-width: 120; -fx-pref-height: 42;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" style="-fx-background-color: #F5F5F5;">
+            <HBox alignment="CENTER" style="-fx-padding: 40;">
+                <VBox spacing="30" style="-fx-max-width: 700; -fx-min-width: 700;">
+
+                    <VBox spacing="20" styleClass="card" style="-fx-padding: 40; -fx-alignment: CENTER;">
+                        <FontAwesomeIconView glyphName="CREDIT_CARD" size="52" fill="#1565C0"/>
+                        <Label text="Atualizar Informações do Cartão"
+                               style="-fx-font-size: 24px; -fx-text-fill: #212121; -fx-font-weight: 600;"/>
+                        <Label text="Altere o limite praticável ou a data de vencimento das próximas faturas"
+                               style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-text-alignment: center;"
+                               wrapText="true" maxWidth="550"/>
+                    </VBox>
+
+                    <VBox spacing="25" styleClass="card" style="-fx-padding: 40; -fx-alignment: CENTER;">
+                        <Label text="Confirme sua Senha"
+                               style="-fx-font-size: 18px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+
+                        <Label text="Para sua segurança, confirme a senha do cartão antes de continuar"
+                               style="-fx-font-size: 13px; -fx-text-fill: #757575; -fx-text-alignment: center;"
+                               wrapText="true" maxWidth="550"/>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-max-width: 300;">
+                            <Label text="Senha do Cartão (4 dígitos) *"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #616161; -fx-font-weight: 500;"/>
+                            <VBox fx:id="passwordContainer" alignment="CENTER"/>
+                            <Label fx:id="passwordError" text="" styleClass="label-error" visible="false" managed="false"/>
+                        </VBox>
+
+                        <Button text="Validar Senha" styleClass="button-primary"
+                                onAction="#handleValidatePassword"
+                                style="-fx-pref-width: 220; -fx-pref-height: 50; -fx-font-size: 15px;"/>
+                    </VBox>
+
+                    <VBox fx:id="cardInfoContainer" spacing="25" styleClass="card"
+                          style="-fx-padding: 40; -fx-background-color: #E3F2FD; -fx-alignment: CENTER;" visible="false" managed="false">
+                        <HBox spacing="15" alignment="CENTER">
+                            <FontAwesomeIconView glyphName="CHECK_CIRCLE" size="24" fill="#1565C0"/>
+                            <Label text="Senha Validada com Sucesso!"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                        </HBox>
+
+                        <GridPane hgap="40" vgap="20" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+
+                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="CENTER">
+                                <Label text="Cartão"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #0D47A1; -fx-font-weight: 500;"/>
+                                <Label fx:id="currentCardLabel" text="•••• •••• •••• 1234"
+                                       style="-fx-font-size: 16px; -fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                            </VBox>
+
+                            <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0" alignment="CENTER">
+                                <Label text="Limite Atual"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #0D47A1; -fx-font-weight: 500;"/>
+                                <Label fx:id="currentLimitLabel" text="R$ 5.000,00"
+                                       style="-fx-font-size: 16px; -fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                            </VBox>
+
+                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="CENTER">
+                                <Label text="Limite Máximo"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #0D47A1; -fx-font-weight: 500;"/>
+                                <Label fx:id="maxLimitLabel" text="R$ 10.000,00"
+                                       style="-fx-font-size: 16px; -fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                            </VBox>
+
+                            <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="CENTER">
+                                <Label text="Vencimento Atual"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #0D47A1; -fx-font-weight: 500;"/>
+                                <Label fx:id="currentDueDayLabel" text="Dia 10"
+                                       style="-fx-font-size: 16px; -fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox fx:id="updateFieldsContainer" spacing="30" styleClass="card" style="-fx-padding: 40; -fx-alignment: CENTER;" visible="false" managed="false">
+                        <Label text="O que deseja atualizar?"
+                               style="-fx-font-size: 18px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+
+                        <Label text="Altere um ou ambos os campos abaixo:"
+                               style="-fx-font-size: 13px; -fx-text-fill: #757575; -fx-text-alignment: center;"/>
+
+                        <VBox spacing="15" style="-fx-max-width: 550;" alignment="CENTER">
+                            <Label text="Novo Limite Praticável"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #616161; -fx-font-weight: 600;"/>
+
+                            <HBox spacing="15" alignment="CENTER">
+                                <Label text="R$" style="-fx-font-size: 18px; -fx-text-fill: #1565C0; -fx-font-weight: 700;"/>
+                                <VBox fx:id="sliderContainer" alignment="CENTER" spacing="10"/>
+                            </HBox>
+
+                            <HBox spacing="10" alignment="CENTER">
+                                <Label text="R$ 50" style="-fx-font-size: 12px; -fx-text-fill: #9E9E9E;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="limitHintLabel" text="Máx: R$ 10.000,00"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #9E9E9E; -fx-font-weight: 600;"/>
+                            </HBox>
+
+                            <Label text="Deixe no valor atual para não alterar"
+                                   style="-fx-font-size: 11px; -fx-text-fill: #BDBDBD; -fx-text-alignment: center; -fx-alignment: center;"/>
+                            <Label fx:id="newLimitError" text="" styleClass="label-error" visible="false" managed="false"/>
+                        </VBox>
+
+                        <Separator style="-fx-background-color: #E0E0E0; -fx-pref-height: 1; -fx-max-width: 550;"/>
+
+                        <VBox spacing="12" style="-fx-max-width: 400; -fx-alignment: CENTER;">
+                            <Label text="Nova Data de Vencimento"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #616161; -fx-font-weight: 600;"/>
+                            <VBox fx:id="comboBoxContainer" alignment="CENTER"/>
+                            <Label text="Deixe em branco para não alterar. Afetará apenas faturas futuras."
+                                   style="-fx-font-size: 11px; -fx-text-fill: #BDBDBD; -fx-text-alignment: center; -fx-alignment: center;"
+                                   wrapText="true" maxWidth="350"/>
+                            <Label fx:id="newDueDayError" text="" styleClass="label-error" visible="false" managed="false"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="15" styleClass="card" style="-fx-padding: 40; -fx-alignment: CENTER;">
+                        <Button fx:id="updateButton" text="Atualizar Informações" styleClass="button-primary"
+                                onAction="#handleUpdate"
+                                style="-fx-pref-height: 56; -fx-pref-width: 320; -fx-font-size: 16px; -fx-font-weight: 600;">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="CHECK" size="18" fill="white"/>
+                            </graphic>
+                        </Button>
+
+                        <Label fx:id="generalError" text="" styleClass="label-error" visible="false" managed="false"
+                               style="-fx-alignment: center; -fx-text-alignment: center;"/>
+                    </VBox>
+
+                    <VBox fx:id="successContainer" spacing="25" styleClass="card"
+                          style="-fx-padding: 50; -fx-alignment: CENTER; -fx-background-color: #E8F5E9;" visible="false" managed="false">
+                        <FontAwesomeIconView glyphName="CHECK_CIRCLE" size="72" fill="#2E7D32"/>
+                        <VBox spacing="15" style="-fx-alignment: CENTER;">
+                            <Label text="Atualização Realizada com Sucesso!"
+                                   style="-fx-font-size: 22px; -fx-text-fill: #1B5E20; -fx-font-weight: 600;"/>
+                            <Label fx:id="successMessage" text=""
+                                   wrapText="true" maxWidth="500"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #2E7D32; -fx-text-alignment: center;"/>
+                        </VBox>
+                        <Button text="Voltar para Home" styleClass="button-primary" onAction="#handleBackToHome"
+                                style="-fx-pref-width: 240; -fx-pref-height: 52; -fx-font-size: 15px;"/>
+                    </VBox>
+
+                </VBox>
+            </HBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
