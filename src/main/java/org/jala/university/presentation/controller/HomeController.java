@@ -51,6 +51,12 @@ public class HomeController extends BaseController {
     private VBox cardContainer;
 
     @FXML
+    private VBox currentCardDisplay;
+
+    @FXML
+    private VBox addCardDisplay;
+
+    @FXML
     private VBox emptyStateContainer;
 
     @FXML
@@ -250,11 +256,14 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleNextCard() {
-        if (userCards != null && currentCardIndex < userCards.size() - 1) {
+        if (userCards != null && currentCardIndex < userCards.size()) {
             currentCardIndex++;
             updateCarouselControls();
             updateCardDisplay();
-            loadTransactions();
+
+            if (currentCardIndex < userCards.size()) {
+                loadTransactions();
+            }
         }
     }
 
@@ -263,14 +272,16 @@ public class HomeController extends BaseController {
             return;
         }
 
+        int totalPositions = userCards.size() + 1;
+
         if (prevCardButton != null && nextCardButton != null) {
             prevCardButton.setDisable(currentCardIndex == 0);
-            nextCardButton.setDisable(currentCardIndex >= userCards.size() - 1);
+            nextCardButton.setDisable(currentCardIndex >= totalPositions - 1);
         }
 
         if (carouselIndicators != null) {
             carouselIndicators.getChildren().clear();
-            for (int i = 0; i < userCards.size(); i++) {
+            for (int i = 0; i < totalPositions; i++) {
                 Circle indicator = new Circle(5);
                 if (i == currentCardIndex) {
                     indicator.setStyle("-fx-fill: #1565C0;");
@@ -283,9 +294,16 @@ public class HomeController extends BaseController {
     }
 
     private void updateCardDisplay() {
-        if (userCards == null || userCards.isEmpty() || currentCardIndex >= userCards.size()) {
+        if (userCards == null || userCards.isEmpty()) {
             return;
         }
+
+        if (currentCardIndex >= userCards.size()) {
+            showAddCardDisplay();
+            return;
+        }
+
+        showCurrentCardDisplay();
 
         CreditCardDto card = userCards.get(currentCardIndex);
 
@@ -300,6 +318,24 @@ public class HomeController extends BaseController {
         if (availableLimitLabel != null) {
             Double availableLimit = card.getLimitAmount() != null ? card.getLimitAmount() : 0.0;
             availableLimitLabel.setText(formatCurrency(availableLimit));
+        }
+    }
+
+    private void showAddCardDisplay() {
+        if (currentCardDisplay != null) {
+            currentCardDisplay.setVisible(false);
+        }
+        if (addCardDisplay != null) {
+            addCardDisplay.setVisible(true);
+        }
+    }
+
+    private void showCurrentCardDisplay() {
+        if (addCardDisplay != null) {
+            addCardDisplay.setVisible(false);
+        }
+        if (currentCardDisplay != null) {
+            currentCardDisplay.setVisible(true);
         }
     }
 

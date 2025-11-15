@@ -9,7 +9,6 @@
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.jala.university.presentation.controller.CardUpdateController"
-            prefWidth="1000" prefHeight="700"
             stylesheets="@styles/application.css"
             style="-fx-background-color: #F5F5F5;">
 

@@ -9,7 +9,6 @@
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.jala.university.presentation.controller.HomeController"
-            prefWidth="1000" prefHeight="700"
             stylesheets="@styles/application.css"
             style="-fx-background-color: #F5F5F5;">
 
@@ -43,7 +42,7 @@
 
                 <Button styleClass="icon-button" onAction="#handleLogout">
                     <graphic>
-                        <FontAwesomeIconView glyphName="COG" size="16" fill="#616161"/>
+                        <FontAwesomeIconView glyphName="SIGN_OUT" size="16" fill="#616161"/>
                     </graphic>
                 </Button>
             </HBox>
@@ -56,6 +55,21 @@
 
                 <VBox fx:id="cardContainer" spacing="20">
                     <StackPane>
+                        <VBox fx:id="addCardDisplay" spacing="20" alignment="CENTER"
+                              styleClass="card"
+                              style="-fx-pref-height: 220; -fx-max-width: 700; -fx-background-color: white; -fx-border-color: #E0E0E0; -fx-border-width: 2; -fx-border-style: dashed; -fx-border-radius: 16; -fx-background-radius: 16; -fx-cursor: hand;"
+                              visible="false"
+                              onMouseClicked="#handleRequestCard">
+                            <StackPane>
+                                <Circle radius="40" style="-fx-fill: #E3F2FD;"/>
+                                <FontAwesomeIconView glyphName="PLUS" size="32" fill="#1565C0"/>
+                            </StackPane>
+                            <Label text="Adicionar novo cartão"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                            <Label text="Solicite um novo cartão de crédito"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #757575;"/>
+                        </VBox>
+
                         <VBox fx:id="currentCardDisplay" spacing="20" alignment="CENTER"
                               styleClass="credit-card"
                               style="-fx-pref-height: 220; -fx-max-width: 700;">
