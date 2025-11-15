@@ -1,7 +1,9 @@
 package org.jala.university.presentation.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -12,6 +14,7 @@ import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.PurchaseService;
 import org.jala.university.application.service.UserService;
+import org.jala.university.application.session.SessionManager;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
@@ -20,6 +23,8 @@ import org.jala.university.presentation.components.TransactionCard;
 import org.jala.university.presentation.context.CardUpdateContext;
 import org.jala.university.presentation.context.InvoiceContext;
 import org.jala.university.presentation.context.UserContext;
+
+import java.util.Optional;
 
 import java.text.NumberFormat;
 import java.time.YearMonth;
@@ -72,6 +77,7 @@ public class HomeController extends BaseController {
     private PurchaseService purchaseService;
     private List<CreditCardDto> userCards;
     private int currentCardIndex = 0;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public void setUserService(UserService service) {
         this.userService = service;
@@ -354,7 +360,19 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleLogout() {
-        ViewSwitcher.switchTo(CreditCardView.LOGIN.getView());
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Sair");
+        confirmAlert.setHeaderText("Deseja realmente sair?");
+        confirmAlert.setContentText("Você será redirecionado para a tela de login.");
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            sessionManager.endSession();
+            userId = null;
+            userCards = null;
+            currentCardIndex = 0;
+            ViewSwitcher.switchTo(CreditCardView.LOGIN.getView());
+        }
     }
 
     private String formatCurrency(Double value) {

@@ -1,16 +1,20 @@
 package org.jala.university.presentation.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.UserService;
+import org.jala.university.application.session.SessionManager;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
 import org.jala.university.presentation.CreditCardView;
 import org.jala.university.presentation.context.UserContext;
+
+import java.util.UUID;
 
 public class LoginController extends BaseController {
 
@@ -21,9 +25,13 @@ public class LoginController extends BaseController {
     private PasswordField passwordField;
 
     @FXML
+    private CheckBox rememberMeCheckBox;
+
+    @FXML
     private Label errorLabel;
 
     private UserService userService;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public void setUserService(UserService service) {
         this.userService = service;
@@ -36,6 +44,29 @@ public class LoginController extends BaseController {
 
         if (userService == null) {
             userService = AppConfig.getInstance().getUserService();
+        }
+
+        tryAutoLogin();
+    }
+
+    private void tryAutoLogin() {
+        if (sessionManager.hasSavedSession()) {
+            UUID savedUserId = sessionManager.getSavedUserId();
+            if (savedUserId != null) {
+                try {
+                    UserDto user = userService.findById(savedUserId);
+                    if (user != null) {
+                        sessionManager.setCurrentUser(user);
+                        UserContext context = new UserContext(user.getId());
+                        ViewSwitcher.switchTo(CreditCardView.HOME.getView(), context);
+                    } else {
+                        sessionManager.clearSavedSession();
+                    }
+                } catch (Exception e) {
+                    sessionManager.clearSavedSession();
+                    showError("Erro ao restaurar sessão");
+                }
+            }
         }
     }
 
@@ -63,6 +94,9 @@ public class LoginController extends BaseController {
                 setFieldError(passwordField, true);
                 return;
             }
+
+            boolean rememberMe = rememberMeCheckBox.isSelected();
+            sessionManager.startSession(user, rememberMe);
 
             UserContext context = new UserContext(user.getId());
             ViewSwitcher.switchTo(CreditCardView.HOME.getView(), context);

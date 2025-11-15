@@ -57,6 +57,10 @@
                                    style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14; -fx-font-size: 14px;"/>
                 </VBox>
 
+                <CheckBox fx:id="rememberMeCheckBox"
+                          text="Lembrar-me"
+                          style="-fx-font-size: 13px; -fx-text-fill: #616161; -fx-font-weight: 500;"/>
+
                 <Label fx:id="errorLabel"
                        text=""
                        wrapText="true"
