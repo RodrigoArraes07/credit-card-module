@@ -5,16 +5,19 @@ import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.application.dto.InvoiceDetailDto;
 import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.application.dto.InvoiceTimelineDto;
+import org.jala.university.application.dto.PaymentResponseDto;
 import org.jala.university.application.dto.PurchaseInstallmentDto;
 import org.jala.university.application.mapper.InvoiceMapper;
 import org.jala.university.application.mapper.PurchaseInstallmentMapper;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.domain.entity.PurchaseInstallment;
+import org.jala.university.domain.enums.PaymentMethod;
 import org.jala.university.domain.repository.InvoiceRepository;
 import org.jala.university.domain.repository.PurchaseInstallmentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -170,6 +173,60 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .collect(Collectors.toList());
         } catch (Exception e) {
             return List.of();
+        }
+    }
+
+    @Override
+    public PaymentResponseDto processPayment(UUID invoiceId, PaymentMethod method) {
+        if (invoiceId == null || method == null) {
+            return PaymentResponseDto.builder()
+                    .success(false)
+                    .message("Dados inválidos. Invoice ID e método de pagamento são obrigatórios.")
+                    .build();
+        }
+
+        try {
+            Invoice invoice = invoiceRepository.findById(invoiceId);
+
+            if (invoice == null) {
+                return PaymentResponseDto.builder()
+                        .success(false)
+                        .message("Fatura não encontrada.")
+                        .invoiceId(invoiceId)
+                        .build();
+            }
+
+            if (invoice.getIsPaid()) {
+                return PaymentResponseDto.builder()
+                        .success(false)
+                        .message("Esta fatura já foi paga.")
+                        .invoiceId(invoiceId)
+                        .paymentMethod(invoice.getPaymentMethod())
+                        .paymentDate(invoice.getPaymentDate())
+                        .build();
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+            invoice.setPaymentMethod(method);
+            invoice.setPaymentDate(now);
+            invoice.setIsPaid(true);
+
+            invoiceRepository.save(invoice);
+
+            return PaymentResponseDto.builder()
+                    .success(true)
+                    .message("Pagamento processado com sucesso!")
+                    .invoiceId(invoice.getId())
+                    .paymentMethod(method)
+                    .paymentDate(now)
+                    .build();
+
+        } catch (Exception e) {
+            return PaymentResponseDto.builder()
+                    .success(false)
+                    .message("Erro ao processar pagamento: " + e.getMessage())
+                    .invoiceId(invoiceId)
+                    .build();
         }
     }
 }
