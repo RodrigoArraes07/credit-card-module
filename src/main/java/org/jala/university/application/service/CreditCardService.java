@@ -22,4 +22,5 @@ public interface CreditCardService {
     CreditCardResponseDto requestCreditCard(CreditCardRequestDto request, User user);
     Double calculatePreApprovedLimit(Double monthlyIncome);
     CreditCardUpdateResponseDto updateCreditCardSettings(CreditCardUpdateDto updateDto);
+    Double calculateAvailableLimit(UUID creditCardId);
 }

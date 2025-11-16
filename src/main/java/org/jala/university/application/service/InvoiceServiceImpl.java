@@ -9,9 +9,11 @@ import org.jala.university.application.dto.PaymentResponseDto;
 import org.jala.university.application.dto.PurchaseInstallmentDto;
 import org.jala.university.application.mapper.InvoiceMapper;
 import org.jala.university.application.mapper.PurchaseInstallmentMapper;
+import org.jala.university.domain.entity.CreditCard;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.domain.entity.PurchaseInstallment;
 import org.jala.university.domain.enums.PaymentMethod;
+import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.domain.repository.InvoiceRepository;
 import org.jala.university.domain.repository.PurchaseInstallmentRepository;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final PurchaseInstallmentRepository purchaseInstallmentRepository;
     private final InvoiceMapper invoiceMapper;
     private final PurchaseInstallmentMapper purchaseInstallmentMapper;
+    private final CreditCardRepository creditCardRepository;
 
     @Override
     public List<InvoiceDto> findAll() {
@@ -221,6 +224,19 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setIsPaid(true);
 
             invoiceRepository.save(invoice);
+
+            CreditCard creditCard = invoice.getCreditCardId();
+            if (creditCard != null) {
+                Double currentLimit = creditCard.getLimitAmount() != null ? creditCard.getLimitAmount() : 0.0;
+                Double newLimit = currentLimit + invoice.getTotalAmount();
+
+                if (creditCard.getMaxLimit() != null && newLimit > creditCard.getMaxLimit()) {
+                    newLimit = creditCard.getMaxLimit();
+                }
+
+                creditCard.setLimitAmount(newLimit);
+                creditCardRepository.save(creditCard);
+            }
 
             return PaymentResponseDto.builder()
                     .success(true)
