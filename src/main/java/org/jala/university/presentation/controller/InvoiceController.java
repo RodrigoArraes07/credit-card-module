@@ -2,20 +2,27 @@ package org.jala.university.presentation.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.InvoiceDetailDto;
 import org.jala.university.application.dto.InvoiceTimelineDto;
+import org.jala.university.application.dto.PaymentResponseDto;
 import org.jala.university.application.dto.PurchaseInstallmentDto;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.InvoiceService;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewContext;
 import org.jala.university.commons.presentation.ViewSwitcher;
+import org.jala.university.domain.enums.PaymentMethod;
 import org.jala.university.infrastructure.config.AppConfig;
 import org.jala.university.presentation.CreditCardView;
+import org.jala.university.presentation.components.ConfirmAnticipationDialog;
+import org.jala.university.presentation.components.PaymentInstructionsDialog;
+import org.jala.university.presentation.components.PaymentMethodDialog;
 import org.jala.university.presentation.components.invoice.InstallmentCard;
 import org.jala.university.presentation.components.invoice.TimelineGraph;
 import org.jala.university.presentation.context.InvoiceContext;
@@ -23,6 +30,7 @@ import org.jala.university.presentation.context.UserContext;
 import org.jala.university.presentation.utils.CurrencyFormatter;
 import org.jala.university.presentation.utils.DateFormatter;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +56,7 @@ public class InvoiceController extends BaseController {
     @FXML private Label installmentsTotalLabel;
     @FXML private VBox installmentsList;
     @FXML private VBox emptyState;
+    @FXML private javafx.scene.control.Button payInvoiceButton;
 
     private UUID creditCardId;
     private UUID userId;
@@ -181,6 +190,9 @@ public class InvoiceController extends BaseController {
             updateMonthLabelsStyle(correspondingLabel);
         }
         loadInvoiceDetails(invoice);
+        loadPurchaseInstallments(invoice.getInstallments());
+
+        timelineData.setCurrentInvoice(invoice);
     }
 
     private void setupMonthClickHandlers(InvoiceDetailDto previous, InvoiceDetailDto current, InvoiceDetailDto next) {
@@ -216,6 +228,7 @@ public class InvoiceController extends BaseController {
 
         updateMonthLabelsStyle(monthLabel);
         loadInvoiceDetails(invoice);
+        loadPurchaseInstallments(invoice.getInstallments());
 
         timelineData.setCurrentInvoice(invoice);
         timelineGraph.setData(timelineData.getPreviousInvoice(), invoice, timelineData.getNextInvoice());
@@ -288,6 +301,36 @@ public class InvoiceController extends BaseController {
         dueDateLabel.setText(DateFormatter.formatFullDate(invoice.getDueDate()));
         closingDateLabel.setText(DateFormatter.formatFullDate(invoice.getClosingDate()));
         installmentsTotalLabel.setText(CurrencyFormatter.format(invoice.getTotalAmount()));
+
+        updatePayInvoiceButton(invoice);
+    }
+
+    private void updatePayInvoiceButton(InvoiceDetailDto invoice) {
+        if (payInvoiceButton == null || invoice == null) return;
+
+        LocalDate today = LocalDate.now();
+        boolean isInvoiceClosed = invoice.getClosingDate().isBefore(today) || invoice.getClosingDate().isEqual(today);
+        boolean isPaid = invoice.getIsPaid() != null && invoice.getIsPaid();
+
+        if (isPaid) {
+            payInvoiceButton.setText("FATURA PAGA");
+            payInvoiceButton.setDisable(true);
+            payInvoiceButton.setStyle(
+                    "-fx-pref-height: 56; -fx-font-size: 15px; -fx-font-weight: 700; " +
+                    "-fx-background-color: #E8F5E9; -fx-text-fill: #2E7D32; -fx-cursor: default;");
+        } else if (!isInvoiceClosed) {
+            payInvoiceButton.setText("FATURA EM ABERTO");
+            payInvoiceButton.setDisable(true);
+            payInvoiceButton.setStyle(
+                    "-fx-pref-height: 56; -fx-font-size: 15px; -fx-font-weight: 700; " +
+                    "-fx-background-color: #FFF3E0; -fx-text-fill: #F57C00; -fx-cursor: default;");
+        } else {
+            payInvoiceButton.setText("PAGAR FATURA COMPLETA");
+            payInvoiceButton.setDisable(false);
+            payInvoiceButton.setStyle(
+                    "-fx-pref-height: 56; -fx-font-size: 15px; -fx-font-weight: 700; " +
+                    "-fx-background-color: #1565C0; -fx-text-fill: white; -fx-cursor: hand;");
+        }
     }
 
     private void loadPurchaseInstallments(List<PurchaseInstallmentDto> installments) {
@@ -388,9 +431,68 @@ public class InvoiceController extends BaseController {
         System.err.println("ERROR: " + message);
     }
 
+    private void showSuccessAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     @FXML
     private void handlePayFullInvoice() {
-        System.out.println("Pay full invoice");
+        if (timelineData == null || timelineData.getCurrentInvoice() == null) {
+            showErrorAlert("Erro", "Nenhuma fatura disponível para pagamento.");
+            return;
+        }
+
+        InvoiceDetailDto currentInvoice = timelineData.getCurrentInvoice();
+
+        if (currentInvoice.getIsPaid() != null && currentInvoice.getIsPaid()) {
+            showErrorAlert("Fatura já paga", "Esta fatura já foi paga.");
+            return;
+        }
+
+        PaymentMethodDialog paymentDialog = new PaymentMethodDialog();
+        Optional<PaymentMethod> selectedMethod = paymentDialog.showAndWait();
+
+        if (selectedMethod.isEmpty()) {
+            System.out.println("Payment cancelled by user");
+            return;
+        }
+
+        try {
+            PaymentResponseDto response = invoiceService.processPayment(
+                    currentInvoice.getId(),
+                    selectedMethod.get()
+            );
+
+            if (response.getSuccess()) {
+                PaymentInstructionsDialog instructionsDialog = new PaymentInstructionsDialog(selectedMethod.get());
+                instructionsDialog.showAndWait();
+
+                showSuccessAlert(
+                        "Pagamento Confirmado",
+                        "Fatura paga com sucesso via " + selectedMethod.get().getDisplayName() + "!"
+                );
+
+                loadInvoiceTimeline();
+            } else {
+                showErrorAlert("Erro no Pagamento", response.getMessage());
+            }
+        } catch (Exception e) {
+            showErrorAlert("Erro", "Erro ao processar pagamento: " + e.getMessage());
+            System.err.println("Error processing payment: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -400,7 +502,66 @@ public class InvoiceController extends BaseController {
 
     @FXML
     private void handleAnticipatePix() {
-        System.out.println("Anticipate via PIX");
+        if (timelineData == null || timelineData.getCurrentInvoice() == null) {
+            showErrorAlert("Erro", "Nenhuma fatura disponível para antecipação.");
+            return;
+        }
+
+        InvoiceDetailDto currentInvoice = timelineData.getCurrentInvoice();
+
+        if (currentInvoice.getIsPaid() != null && currentInvoice.getIsPaid()) {
+            showErrorAlert("Fatura já paga", "Esta fatura já foi paga. Não é possível antecipar uma fatura que já foi paga.");
+            return;
+        }
+
+        if (currentInvoice.getTotalAmount() == null || currentInvoice.getTotalAmount() <= 0) {
+            showErrorAlert("Valor inválido", "Esta fatura não possui valor a ser pago.");
+            return;
+        }
+
+        ConfirmAnticipationDialog confirmDialog = new ConfirmAnticipationDialog(
+                CurrencyFormatter.format(currentInvoice.getTotalAmount()),
+                DateFormatter.formatFullDate(currentInvoice.getDueDate())
+        );
+
+        confirmDialog.showAndWait().ifPresent(confirmed -> {
+            if (confirmed) {
+                PaymentMethodDialog paymentDialog = new PaymentMethodDialog();
+                Optional<PaymentMethod> selectedMethod = paymentDialog.showAndWait();
+
+                if (selectedMethod.isPresent()) {
+                    processAnticipation(currentInvoice, selectedMethod.get());
+                }
+            }
+        });
+    }
+
+    private void processAnticipation(InvoiceDetailDto invoice, PaymentMethod method) {
+        try {
+            PaymentResponseDto response = invoiceService.processPayment(
+                    invoice.getId(),
+                    method
+            );
+
+            if (response.getSuccess()) {
+                PaymentInstructionsDialog instructionsDialog = new PaymentInstructionsDialog(method);
+                instructionsDialog.showAndWait();
+
+                showSuccessAlert(
+                        "Antecipação Confirmada",
+                        "Fatura antecipada com sucesso via " + method.getDisplayName() + "!\n" +
+                        "Seu limite foi liberado imediatamente."
+                );
+
+                loadInvoiceTimeline();
+            } else {
+                showErrorAlert("Erro na Antecipação", response.getMessage());
+            }
+        } catch (Exception e) {
+            showErrorAlert("Erro", "Erro ao processar antecipação: " + e.getMessage());
+            System.err.println("Error processing anticipation: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML

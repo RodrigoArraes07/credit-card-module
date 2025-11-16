@@ -81,10 +81,19 @@ public class InvoiceServiceImpl implements InvoiceService {
                 return Optional.empty();
             }
 
+            LocalDate today = LocalDate.now();
+            int currentMonth = today.getMonthValue();
+            int currentYear = today.getYear();
+
             Invoice currentInvoice = allInvoices.stream()
-                    .filter(i -> !i.getIsPaid())
-                    .min((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
-                    .orElse(null);
+                    .filter(i -> i.getClosingDate().getMonthValue() == currentMonth
+                            && i.getClosingDate().getYear() == currentYear)
+                    .findFirst()
+                    .orElse(
+                            allInvoices.stream()
+                                    .max((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
+                                    .orElse(null)
+                    );
 
             if (currentInvoice == null) {
                 return Optional.empty();
