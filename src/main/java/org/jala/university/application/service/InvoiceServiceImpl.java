@@ -189,6 +189,34 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public List<InvoiceDetailDto> getAllInvoicesByCreditCard(UUID creditCardId) {
+        if (creditCardId == null) {
+            return List.of();
+        }
+
+        try {
+            List<Invoice> invoices = invoiceRepository.findByCreditCardId(creditCardId);
+
+            if (invoices == null || invoices.isEmpty()) {
+                return List.of();
+            }
+
+            return invoices.stream()
+                    .sorted((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
+                    .map(invoice -> {
+                        List<PurchaseInstallment> installments = purchaseInstallmentRepository.findByInvoiceId(invoice.getId());
+                        List<PurchaseInstallmentDto> installmentDtos = installments.stream()
+                                .map(purchaseInstallmentMapper::mapTo)
+                                .toList();
+                        return invoiceMapper.toDetailDto(invoice, installmentDtos);
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    @Override
     public PaymentResponseDto processPayment(UUID invoiceId, PaymentMethod method) {
         if (invoiceId == null || method == null) {
             return PaymentResponseDto.builder()

@@ -21,5 +21,6 @@ public interface InvoiceService {
     Optional<InvoiceTimelineDto> getInvoiceTimeline(UUID creditCardId);
     Optional<InvoiceDetailDto> getInvoiceDetail(UUID invoiceId);
     List<InvoiceDto> getInvoicesByYear(UUID creditCardId, int year);
+    List<InvoiceDetailDto> getAllInvoicesByCreditCard(UUID creditCardId);
     PaymentResponseDto processPayment(UUID invoiceId, PaymentMethod method);
 }

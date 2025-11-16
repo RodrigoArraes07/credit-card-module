@@ -57,12 +57,19 @@ public class InvoiceController extends BaseController {
     @FXML private VBox installmentsList;
     @FXML private VBox emptyState;
     @FXML private javafx.scene.control.Button payInvoiceButton;
+    @FXML private javafx.scene.control.Button prevInvoiceButton;
+    @FXML private javafx.scene.control.Button nextInvoiceButton;
+    @FXML private VBox paidInvoiceBadge;
+    @FXML private Label paidInvoiceDetails;
+    @FXML private Label paidInvoiceLimitInfo;
 
     private UUID creditCardId;
     private UUID userId;
     private List<CreditCardDto> userCards;
     private InvoiceTimelineDto timelineData;
     private Label selectedMonthLabel;
+    private List<InvoiceDetailDto> allInvoices;
+    private int currentInvoiceIndex = 0;
 
     public InvoiceController() {
         this.invoiceService = AppConfig.getInstance().getInvoiceService();
@@ -139,35 +146,133 @@ public class InvoiceController extends BaseController {
 
     private void loadInvoiceTimeline() {
         System.out.println("loadInvoiceTimeline() called for creditCardId: " + creditCardId);
-        Optional<InvoiceTimelineDto> timeline = invoiceService.getInvoiceTimeline(creditCardId);
 
-        if (timeline.isEmpty() || timeline.get().getCurrentInvoice() == null) {
-            System.out.println("No timeline data found - showing empty state");
+        allInvoices = invoiceService.getAllInvoicesByCreditCard(creditCardId);
+
+        if (allInvoices == null || allInvoices.isEmpty()) {
+            System.out.println("No invoices found - showing empty state");
             showEmptyState();
             return;
         }
 
-        System.out.println("Timeline data found - loading UI");
+        System.out.println("Found " + allInvoices.size() + " invoices - loading UI");
         hideEmptyState();
 
-        timelineData = timeline.get();
-        InvoiceDetailDto current = timelineData.getCurrentInvoice();
-        InvoiceDetailDto previous = timelineData.getPreviousInvoice();
-        InvoiceDetailDto next = timelineData.getNextInvoice();
+        findCurrentInvoiceIndex();
+        updateInvoiceDisplay();
+    }
 
-        yearLabel.setText(String.valueOf(timelineData.getYear()));
+    private void findCurrentInvoiceIndex() {
+        LocalDate today = LocalDate.now();
+
+        for (int i = 0; i < allInvoices.size(); i++) {
+            InvoiceDetailDto invoice = allInvoices.get(i);
+            boolean isInvoiceClosed = invoice.getClosingDate().isBefore(today) || invoice.getClosingDate().isEqual(today);
+            boolean isPaid = invoice.getIsPaid() != null && invoice.getIsPaid();
+
+            if (isInvoiceClosed && !isPaid) {
+                currentInvoiceIndex = i;
+                return;
+            }
+        }
+
+        for (int i = 0; i < allInvoices.size(); i++) {
+            InvoiceDetailDto invoice = allInvoices.get(i);
+            if (invoice.getIsPaid() == null || !invoice.getIsPaid()) {
+                currentInvoiceIndex = i;
+                return;
+            }
+        }
+
+        currentInvoiceIndex = allInvoices.size() > 0 ? allInvoices.size() - 1 : 0;
+    }
+
+    private void updateInvoiceDisplay() {
+        if (allInvoices == null || allInvoices.isEmpty()) {
+            return;
+        }
+
+        InvoiceDetailDto current = allInvoices.get(currentInvoiceIndex);
+        InvoiceDetailDto previous = currentInvoiceIndex > 0 ? allInvoices.get(currentInvoiceIndex - 1) : null;
+        InvoiceDetailDto next = currentInvoiceIndex < allInvoices.size() - 1 ? allInvoices.get(currentInvoiceIndex + 1) : null;
+
+        yearLabel.setText(String.valueOf(current.getClosingDate().getYear()));
 
         updateAmountLabels(previous, current, next);
         updateMonthLabels(previous, current, next);
         setupTimelineGraph(previous, current, next);
         loadInvoiceDetails(current);
         loadPurchaseInstallments(current.getInstallments());
+        updateNavigationControls();
+
+        timelineData = InvoiceTimelineDto.builder()
+                .previousInvoice(previous)
+                .currentInvoice(current)
+                .nextInvoice(next)
+                .year(current.getClosingDate().getYear())
+                .build();
+    }
+
+    private void updateNavigationControls() {
+        if (prevInvoiceButton != null && nextInvoiceButton != null) {
+            prevInvoiceButton.setDisable(currentInvoiceIndex == 0);
+            nextInvoiceButton.setDisable(currentInvoiceIndex >= allInvoices.size() - 1);
+        }
+    }
+
+    @FXML
+    private void handlePreviousInvoice() {
+        if (currentInvoiceIndex > 0) {
+            currentInvoiceIndex--;
+            updateInvoiceDisplay();
+        }
+    }
+
+    @FXML
+    private void handleNextInvoice() {
+        if (allInvoices != null && currentInvoiceIndex < allInvoices.size() - 1) {
+            currentInvoiceIndex++;
+            updateInvoiceDisplay();
+        }
     }
 
     private void updateAmountLabels(InvoiceDetailDto previous, InvoiceDetailDto current, InvoiceDetailDto next) {
-        previousInvoiceAmount.setText(previous != null ? CurrencyFormatter.format(previous.getTotalAmount()) : "R$ 0,00");
-        currentInvoiceAmount.setText(CurrencyFormatter.format(current.getTotalAmount()));
-        nextInvoiceAmount.setText(next != null ? CurrencyFormatter.format(next.getTotalAmount()) : "R$ 0,00");
+        if (previous != null) {
+            boolean previousPaid = previous.getIsPaid() != null && previous.getIsPaid();
+            if (previousPaid) {
+                previousInvoiceAmount.setText("PAGA");
+                previousInvoiceAmount.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #4CAF50;");
+            } else {
+                previousInvoiceAmount.setText(CurrencyFormatter.format(previous.getTotalAmount()));
+                previousInvoiceAmount.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #2E7D32;");
+            }
+        } else {
+            previousInvoiceAmount.setText("R$ 0,00");
+            previousInvoiceAmount.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #2E7D32;");
+        }
+
+        boolean currentPaid = current.getIsPaid() != null && current.getIsPaid();
+        if (currentPaid) {
+            currentInvoiceAmount.setText("PAGA");
+            currentInvoiceAmount.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #4CAF50;");
+        } else {
+            currentInvoiceAmount.setText(CurrencyFormatter.format(current.getTotalAmount()));
+            currentInvoiceAmount.setStyle("-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #7B1FA2;");
+        }
+
+        if (next != null) {
+            boolean nextPaid = next.getIsPaid() != null && next.getIsPaid();
+            if (nextPaid) {
+                nextInvoiceAmount.setText("PAGA");
+                nextInvoiceAmount.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #4CAF50;");
+            } else {
+                nextInvoiceAmount.setText(CurrencyFormatter.format(next.getTotalAmount()));
+                nextInvoiceAmount.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #9E9E9E;");
+            }
+        } else {
+            nextInvoiceAmount.setText("R$ 0,00");
+            nextInvoiceAmount.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #9E9E9E;");
+        }
     }
 
     private void updateMonthLabels(InvoiceDetailDto previous, InvoiceDetailDto current, InvoiceDetailDto next) {
@@ -303,6 +408,33 @@ public class InvoiceController extends BaseController {
         installmentsTotalLabel.setText(CurrencyFormatter.format(invoice.getTotalAmount()));
 
         updatePayInvoiceButton(invoice);
+        updatePaidInvoiceBadge(invoice);
+    }
+
+    private void updatePaidInvoiceBadge(InvoiceDetailDto invoice) {
+        if (paidInvoiceBadge == null || invoice == null) return;
+
+        boolean isPaid = invoice.getIsPaid() != null && invoice.getIsPaid();
+
+        if (isPaid) {
+            paidInvoiceBadge.setVisible(true);
+            paidInvoiceBadge.setManaged(true);
+
+            if (paidInvoiceDetails != null && invoice.getPaymentDate() != null && invoice.getPaymentMethod() != null) {
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+                String paymentDateStr = invoice.getPaymentDate().format(dateFormatter);
+                String paymentMethodStr = invoice.getPaymentMethod().getDisplayName();
+                paidInvoiceDetails.setText("Paga em " + paymentDateStr + " via " + paymentMethodStr);
+            }
+
+            if (paidInvoiceLimitInfo != null) {
+                String limitAmount = CurrencyFormatter.format(invoice.getTotalAmount());
+                paidInvoiceLimitInfo.setText("Seu limite de " + limitAmount + " já foi liberado e está disponível");
+            }
+        } else {
+            paidInvoiceBadge.setVisible(false);
+            paidInvoiceBadge.setManaged(false);
+        }
     }
 
     private void updatePayInvoiceButton(InvoiceDetailDto invoice) {

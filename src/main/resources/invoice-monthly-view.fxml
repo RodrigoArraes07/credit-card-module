@@ -72,10 +72,24 @@
                         </VBox>
                     </HBox>
 
-                    <StackPane>
-                        <org.jala.university.presentation.components.invoice.TimelineGraph
-                            fx:id="timelineGraph" prefHeight="120" maxWidth="Infinity"/>
-                    </StackPane>
+                    <HBox alignment="CENTER" spacing="15">
+                        <Button fx:id="prevInvoiceButton" styleClass="icon-button" onAction="#handlePreviousInvoice">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="CHEVRON_LEFT" size="16" fill="#616161"/>
+                            </graphic>
+                        </Button>
+
+                        <StackPane HBox.hgrow="ALWAYS">
+                            <org.jala.university.presentation.components.invoice.TimelineGraph
+                                fx:id="timelineGraph" prefHeight="120" maxWidth="Infinity"/>
+                        </StackPane>
+
+                        <Button fx:id="nextInvoiceButton" styleClass="icon-button" onAction="#handleNextInvoice">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="CHEVRON_RIGHT" size="16" fill="#616161"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
 
                     <HBox alignment="CENTER" spacing="40" style="-fx-padding: 0 20;">
                         <Label fx:id="previousMonthLabel" text="Out."
@@ -173,6 +187,25 @@
                                style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
                     </VBox>
                 </GridPane>
+
+                <VBox fx:id="paidInvoiceBadge" spacing="12" styleClass="card"
+                      style="-fx-background-color: #E8F5E9; -fx-border-color: #4CAF50; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;"
+                      visible="false" managed="false">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <StackPane>
+                            <Circle radius="20" style="-fx-fill: #4CAF50;"/>
+                            <FontAwesomeIconView glyphName="CHECK" size="16" fill="white"/>
+                        </StackPane>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="FATURA PAGA COM SUCESSO!"
+                                   style="-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #2E7D32;"/>
+                            <Label fx:id="paidInvoiceDetails" text="Paga em 15/11/2025 às 14:30 via PIX"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #388E3C;"/>
+                            <Label fx:id="paidInvoiceLimitInfo" text="Seu limite de R$ 2.300,79 já foi liberado e está disponível"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #388E3C;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
 
                 <VBox spacing="18" styleClass="card">
                     <HBox alignment="CENTER_LEFT">
