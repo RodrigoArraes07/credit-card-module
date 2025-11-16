@@ -1,15 +1,15 @@
 package org.jala.university.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.*;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 import org.jala.university.commons.domain.entity.BaseEntity;
+import org.jala.university.domain.enums.PaymentMethod;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -17,8 +17,6 @@ import java.util.UUID;
 @Table(name = "invoices")
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public final class Invoice implements BaseEntity<UUID> {
 
     @Id
@@ -41,6 +39,13 @@ public final class Invoice implements BaseEntity<UUID> {
 
     @Column(name = "is_paid", nullable = false)
     private Boolean isPaid;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "payment_date")
+    private LocalDateTime paymentDate;
 
     @CreatedDate
     @Column(name = "created_date")
