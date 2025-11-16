@@ -1,7 +1,9 @@
 package org.jala.university.presentation.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -12,6 +14,7 @@ import org.jala.university.application.dto.UserDto;
 import org.jala.university.application.service.CreditCardService;
 import org.jala.university.application.service.PurchaseService;
 import org.jala.university.application.service.UserService;
+import org.jala.university.application.session.SessionManager;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewSwitcher;
 import org.jala.university.infrastructure.config.AppConfig;
@@ -20,6 +23,8 @@ import org.jala.university.presentation.components.TransactionCard;
 import org.jala.university.presentation.context.CardUpdateContext;
 import org.jala.university.presentation.context.InvoiceContext;
 import org.jala.university.presentation.context.UserContext;
+
+import java.util.Optional;
 
 import java.text.NumberFormat;
 import java.time.YearMonth;
@@ -44,6 +49,12 @@ public class HomeController extends BaseController {
 
     @FXML
     private VBox cardContainer;
+
+    @FXML
+    private VBox currentCardDisplay;
+
+    @FXML
+    private VBox addCardDisplay;
 
     @FXML
     private VBox emptyStateContainer;
@@ -72,6 +83,7 @@ public class HomeController extends BaseController {
     private PurchaseService purchaseService;
     private List<CreditCardDto> userCards;
     private int currentCardIndex = 0;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public void setUserService(UserService service) {
         this.userService = service;
@@ -244,11 +256,14 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleNextCard() {
-        if (userCards != null && currentCardIndex < userCards.size() - 1) {
+        if (userCards != null && currentCardIndex < userCards.size()) {
             currentCardIndex++;
             updateCarouselControls();
             updateCardDisplay();
-            loadTransactions();
+
+            if (currentCardIndex < userCards.size()) {
+                loadTransactions();
+            }
         }
     }
 
@@ -257,14 +272,16 @@ public class HomeController extends BaseController {
             return;
         }
 
+        int totalPositions = userCards.size() + 1;
+
         if (prevCardButton != null && nextCardButton != null) {
             prevCardButton.setDisable(currentCardIndex == 0);
-            nextCardButton.setDisable(currentCardIndex >= userCards.size() - 1);
+            nextCardButton.setDisable(currentCardIndex >= totalPositions - 1);
         }
 
         if (carouselIndicators != null) {
             carouselIndicators.getChildren().clear();
-            for (int i = 0; i < userCards.size(); i++) {
+            for (int i = 0; i < totalPositions; i++) {
                 Circle indicator = new Circle(5);
                 if (i == currentCardIndex) {
                     indicator.setStyle("-fx-fill: #1565C0;");
@@ -277,9 +294,16 @@ public class HomeController extends BaseController {
     }
 
     private void updateCardDisplay() {
-        if (userCards == null || userCards.isEmpty() || currentCardIndex >= userCards.size()) {
+        if (userCards == null || userCards.isEmpty()) {
             return;
         }
+
+        if (currentCardIndex >= userCards.size()) {
+            showAddCardDisplay();
+            return;
+        }
+
+        showCurrentCardDisplay();
 
         CreditCardDto card = userCards.get(currentCardIndex);
 
@@ -294,6 +318,24 @@ public class HomeController extends BaseController {
         if (availableLimitLabel != null) {
             Double availableLimit = card.getLimitAmount() != null ? card.getLimitAmount() : 0.0;
             availableLimitLabel.setText(formatCurrency(availableLimit));
+        }
+    }
+
+    private void showAddCardDisplay() {
+        if (currentCardDisplay != null) {
+            currentCardDisplay.setVisible(false);
+        }
+        if (addCardDisplay != null) {
+            addCardDisplay.setVisible(true);
+        }
+    }
+
+    private void showCurrentCardDisplay() {
+        if (addCardDisplay != null) {
+            addCardDisplay.setVisible(false);
+        }
+        if (currentCardDisplay != null) {
+            currentCardDisplay.setVisible(true);
         }
     }
 
@@ -354,7 +396,19 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleLogout() {
-        ViewSwitcher.switchTo(CreditCardView.LOGIN.getView());
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Sair");
+        confirmAlert.setHeaderText("Deseja realmente sair?");
+        confirmAlert.setContentText("Você será redirecionado para a tela de login.");
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            sessionManager.endSession();
+            userId = null;
+            userCards = null;
+            currentCardIndex = 0;
+            ViewSwitcher.switchTo(CreditCardView.LOGIN.getView());
+        }
     }
 
     private String formatCurrency(Double value) {

@@ -10,7 +10,6 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.jala.university.presentation.controller.InvoiceController"
             stylesheets="@styles/application.css"
-            prefWidth="1000" prefHeight="700"
             style="-fx-background-color: #F5F5F5;">
 
     <top>

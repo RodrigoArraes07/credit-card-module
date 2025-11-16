@@ -27,6 +27,18 @@ public final class MainApp extends Application {
             Scene scene = new Scene(new Pane(), WINDOW_WIDTH, WINDOW_HEIGHT);
             ViewSwitcher.setup(primaryStage, scene);
 
+            primaryStage.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (!primaryStage.isMaximized()) {
+                    primaryStage.setMaximized(true);
+                }
+            });
+
+            scene.rootProperty().addListener((obs, oldRoot, newRoot) -> {
+                if (!primaryStage.isMaximized()) {
+                    primaryStage.setMaximized(true);
+                }
+            });
+
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/login-view.fxml")
             );
@@ -38,6 +50,7 @@ public final class MainApp extends Application {
             scene.setRoot(root);
             primaryStage.setScene(scene);
             primaryStage.setTitle(APPLICATION_TITLE);
+            primaryStage.setMaximized(true);
             primaryStage.setOnCloseRequest(e -> config.close());
             primaryStage.show();
 
