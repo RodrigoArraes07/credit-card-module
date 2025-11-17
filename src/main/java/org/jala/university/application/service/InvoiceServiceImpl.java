@@ -5,16 +5,21 @@ import org.jala.university.application.dto.InvoiceCreateDTO;
 import org.jala.university.application.dto.InvoiceDetailDto;
 import org.jala.university.application.dto.InvoiceDto;
 import org.jala.university.application.dto.InvoiceTimelineDto;
+import org.jala.university.application.dto.PaymentResponseDto;
 import org.jala.university.application.dto.PurchaseInstallmentDto;
 import org.jala.university.application.mapper.InvoiceMapper;
 import org.jala.university.application.mapper.PurchaseInstallmentMapper;
+import org.jala.university.domain.entity.CreditCard;
 import org.jala.university.domain.entity.Invoice;
 import org.jala.university.domain.entity.PurchaseInstallment;
+import org.jala.university.domain.enums.PaymentMethod;
+import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.domain.repository.InvoiceRepository;
 import org.jala.university.domain.repository.PurchaseInstallmentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +32,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final PurchaseInstallmentRepository purchaseInstallmentRepository;
     private final InvoiceMapper invoiceMapper;
     private final PurchaseInstallmentMapper purchaseInstallmentMapper;
+    private final CreditCardRepository creditCardRepository;
 
     @Override
     public List<InvoiceDto> findAll() {
@@ -78,10 +84,19 @@ public class InvoiceServiceImpl implements InvoiceService {
                 return Optional.empty();
             }
 
+            LocalDate today = LocalDate.now();
+            int currentMonth = today.getMonthValue();
+            int currentYear = today.getYear();
+
             Invoice currentInvoice = allInvoices.stream()
-                    .filter(i -> !i.getIsPaid())
-                    .min((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
-                    .orElse(null);
+                    .filter(i -> i.getClosingDate().getMonthValue() == currentMonth
+                            && i.getClosingDate().getYear() == currentYear)
+                    .findFirst()
+                    .orElse(
+                            allInvoices.stream()
+                                    .max((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
+                                    .orElse(null)
+                    );
 
             if (currentInvoice == null) {
                 return Optional.empty();
@@ -170,6 +185,101 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .collect(Collectors.toList());
         } catch (Exception e) {
             return List.of();
+        }
+    }
+
+    @Override
+    public List<InvoiceDetailDto> getAllInvoicesByCreditCard(UUID creditCardId) {
+        if (creditCardId == null) {
+            return List.of();
+        }
+
+        try {
+            List<Invoice> invoices = invoiceRepository.findByCreditCardId(creditCardId);
+
+            if (invoices == null || invoices.isEmpty()) {
+                return List.of();
+            }
+
+            return invoices.stream()
+                    .sorted((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
+                    .map(invoice -> {
+                        List<PurchaseInstallment> installments = purchaseInstallmentRepository.findByInvoiceId(invoice.getId());
+                        List<PurchaseInstallmentDto> installmentDtos = installments.stream()
+                                .map(purchaseInstallmentMapper::mapTo)
+                                .toList();
+                        return invoiceMapper.toDetailDto(invoice, installmentDtos);
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    @Override
+    public PaymentResponseDto processPayment(UUID invoiceId, PaymentMethod method) {
+        if (invoiceId == null || method == null) {
+            return PaymentResponseDto.builder()
+                    .success(false)
+                    .message("Dados inválidos. Invoice ID e método de pagamento são obrigatórios.")
+                    .build();
+        }
+
+        try {
+            Invoice invoice = invoiceRepository.findById(invoiceId);
+
+            if (invoice == null) {
+                return PaymentResponseDto.builder()
+                        .success(false)
+                        .message("Fatura não encontrada.")
+                        .invoiceId(invoiceId)
+                        .build();
+            }
+
+            if (invoice.getIsPaid()) {
+                return PaymentResponseDto.builder()
+                        .success(false)
+                        .message("Esta fatura já foi paga.")
+                        .invoiceId(invoiceId)
+                        .paymentMethod(invoice.getPaymentMethod())
+                        .paymentDate(invoice.getPaymentDate())
+                        .build();
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+            invoice.setPaymentMethod(method);
+            invoice.setPaymentDate(now);
+            invoice.setIsPaid(true);
+
+            invoiceRepository.save(invoice);
+
+            CreditCard creditCard = invoice.getCreditCardId();
+            if (creditCard != null) {
+                Double currentLimit = creditCard.getLimitAmount() != null ? creditCard.getLimitAmount() : 0.0;
+                Double newLimit = currentLimit + invoice.getTotalAmount();
+
+                if (creditCard.getMaxLimit() != null && newLimit > creditCard.getMaxLimit()) {
+                    newLimit = creditCard.getMaxLimit();
+                }
+
+                creditCard.setLimitAmount(newLimit);
+                creditCardRepository.save(creditCard);
+            }
+
+            return PaymentResponseDto.builder()
+                    .success(true)
+                    .message("Pagamento processado com sucesso!")
+                    .invoiceId(invoice.getId())
+                    .paymentMethod(method)
+                    .paymentDate(now)
+                    .build();
+
+        } catch (Exception e) {
+            return PaymentResponseDto.builder()
+                    .success(false)
+                    .message("Erro ao processar pagamento: " + e.getMessage())
+                    .invoiceId(invoiceId)
+                    .build();
         }
     }
 }

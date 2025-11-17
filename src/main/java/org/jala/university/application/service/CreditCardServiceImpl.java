@@ -239,4 +239,37 @@ public class CreditCardServiceImpl implements CreditCardService {
                 .success(false)
                 .build();
     }
+
+    @Override
+    public Double calculateAvailableLimit(UUID creditCardId) {
+        if (creditCardId == null) {
+            return 0.0;
+        }
+
+        try {
+            CreditCard card = creditCardRepository.findById(creditCardId);
+            if (card == null || card.getMaxLimit() == null) {
+                return 0.0;
+            }
+
+            Double maxLimit = card.getMaxLimit();
+            List<Invoice> unpaidInvoices = invoiceRepository.findByCreditCardId(creditCardId);
+
+            if (unpaidInvoices == null || unpaidInvoices.isEmpty()) {
+                return maxLimit;
+            }
+
+            Double totalUnpaid = unpaidInvoices.stream()
+                    .filter(invoice -> invoice.getIsPaid() == null || !invoice.getIsPaid())
+                    .map(Invoice::getTotalAmount)
+                    .reduce(0.0, Double::sum);
+
+            Double availableLimit = maxLimit - totalUnpaid;
+            return Math.max(availableLimit, 0.0);
+
+        } catch (Exception e) {
+            System.err.println("Error calculating available limit: " + e.getMessage());
+            return 0.0;
+        }
+    }
 }

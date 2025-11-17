@@ -3,13 +3,14 @@ package org.jala.university.application.dto;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.jala.university.domain.enums.CreditCardStatus;
+import org.jala.university.domain.enums.PaymentMethod;
 
 /**
  * InvoiceDto é um Data Transfer Object (DTO) utilizado para transferir apenas os dados necessários
@@ -37,5 +38,7 @@ public class InvoiceDto implements Serializable {
     private LocalDate dueDate;
     private Double totalAmount;
     private Boolean isPaid;
+    private PaymentMethod paymentMethod;
+    private LocalDateTime paymentDate;
 
 }

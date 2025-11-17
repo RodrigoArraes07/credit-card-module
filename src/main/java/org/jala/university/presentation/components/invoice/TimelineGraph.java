@@ -121,10 +121,17 @@ public class TimelineGraph extends Region {
         path.getElements().addAll(moveTo, curve1, curve2);
         drawPane.getChildren().add(path);
 
-        boolean previousPaid = previous != null && previous.getIsPaid();
-        addInvoicePoint(x1, y1, previousPaid, 16, "#2E7D32", previous);
-        addInvoicePoint(x2, y2, false, 20, "#7B1FA2", current);
-        addInvoicePoint(x3, y3, false, 16, "#9E9E9E", next);
+        boolean previousPaid = previous != null && previous.getIsPaid() != null && previous.getIsPaid();
+        boolean currentPaid = current != null && current.getIsPaid() != null && current.getIsPaid();
+        boolean nextPaid = next != null && next.getIsPaid() != null && next.getIsPaid();
+
+        String previousColor = getColorForInvoice(previous, false);
+        String currentColor = getColorForInvoice(current, true);
+        String nextColor = getColorForInvoice(next, false);
+
+        addInvoicePoint(x1, y1, previousPaid, 16, previousColor, previous);
+        addInvoicePoint(x2, y2, currentPaid, 20, currentColor, current);
+        addInvoicePoint(x3, y3, nextPaid, 16, nextColor, next);
 
         FadeTransition fade = new FadeTransition(Duration.millis(600), drawPane);
         fade.setFromValue(0.0);
@@ -136,6 +143,24 @@ public class TimelineGraph extends Region {
         double normalized = value / maxValue;
         double range = 60;
         return baseY - (normalized * range);
+    }
+
+    private String getColorForInvoice(InvoiceDetailDto invoice, boolean isCurrent) {
+        if (invoice == null) {
+            return "#9E9E9E";
+        }
+
+        boolean isPaid = invoice.getIsPaid() != null && invoice.getIsPaid();
+
+        if (isPaid) {
+            return "#4CAF50";
+        }
+
+        if (isCurrent) {
+            return "#7B1FA2";
+        }
+
+        return "#9E9E9E";
     }
 
     private void addInvoicePoint(double x, double y, boolean isPaid, double size, String color, InvoiceDetailDto invoice) {

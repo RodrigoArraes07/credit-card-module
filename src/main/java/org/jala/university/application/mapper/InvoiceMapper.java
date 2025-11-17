@@ -72,6 +72,8 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
                 .dueDate(input.getDueDate())
                 .totalAmount(input.getTotalAmount())
                 .isPaid(input.getIsPaid())
+                .paymentMethod(input.getPaymentMethod())
+                .paymentDate(input.getPaymentDate())
                 .build();
     }
 
@@ -85,6 +87,8 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
                 .dueDate(input.getDueDate())
                 .totalAmount(input.getTotalAmount())
                 .isPaid(input.getIsPaid())
+                .paymentMethod(input.getPaymentMethod())
+                .paymentDate(input.getPaymentDate())
                 .build();
     }
 
@@ -98,6 +102,8 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
                 .dueDate(entity.getDueDate())
                 .totalAmount(entity.getTotalAmount())
                 .isPaid(entity.getIsPaid())
+                .paymentMethod(entity.getPaymentMethod())
+                .paymentDate(entity.getPaymentDate())
                 .installments(installments != null ? installments : List.of())
                 .build();
     }

@@ -316,7 +316,7 @@ public class HomeController extends BaseController {
         }
 
         if (availableLimitLabel != null) {
-            Double availableLimit = card.getLimitAmount() != null ? card.getLimitAmount() : 0.0;
+            Double availableLimit = creditCardService.calculateAvailableLimit(card.getCredit_card_id());
             availableLimitLabel.setText(formatCurrency(availableLimit));
         }
     }

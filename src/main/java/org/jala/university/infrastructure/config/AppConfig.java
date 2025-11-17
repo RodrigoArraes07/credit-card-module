@@ -92,7 +92,8 @@ public class AppConfig {
                 invoiceRepository,
                 purchaseInstallmentRepository,
                 InvoiceMapper.getInstance(),
-                PurchaseInstallmentMapper.getInstance()
+                PurchaseInstallmentMapper.getInstance(),
+                creditCardRepository
         );
         this.purchaseService = new PurchaseServiceImpl(
                 purchaseRepository,
