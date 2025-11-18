@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.dto.CreditCardStatusUpdateRequestDto;
+import org.jala.university.application.dto.CreditCardStatusUpdateResponseDto;
 import org.jala.university.application.dto.CreditCardUpdateDto;
 import org.jala.university.application.dto.CreditCardUpdateResponseDto;
 import org.jala.university.application.mapper.CreditCardMapper;
@@ -14,6 +16,7 @@ import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.domain.repository.InvoiceRepository;
+import org.jala.university.infrastructure.util.PasswordHashUtil;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -271,5 +274,100 @@ public class CreditCardServiceImpl implements CreditCardService {
             System.err.println("Error calculating available limit: " + e.getMessage());
             return 0.0;
         }
+    }
+
+    @Override
+    public CreditCardStatusUpdateResponseDto blockCard(CreditCardStatusUpdateRequestDto requestDto) {
+        return changeCardStatus(requestDto, CreditCardStatus.BLOCKED,
+                "Cartão já está bloqueado.",
+                "Cartão bloqueado temporariamente com sucesso.");
+    }
+
+    @Override
+    public CreditCardStatusUpdateResponseDto unblockCard(CreditCardStatusUpdateRequestDto requestDto) {
+        return changeCardStatus(requestDto, CreditCardStatus.ACTIVE,
+                "Cartão já está desbloqueado.",
+                "Cartão desbloqueado com sucesso.");
+    }
+
+    private CreditCardStatusUpdateResponseDto changeCardStatus(
+            CreditCardStatusUpdateRequestDto requestDto,
+            CreditCardStatus desiredStatus,
+            String alreadyMessage,
+            String successMessage) {
+        if (requestDto == null
+                || requestDto.getUserId() == null
+                || requestDto.getUserPassword() == null
+                || requestDto.getCardNumber() == null) {
+            return buildStatusErrorResponse(null, "Dados inválidos para alterar status do cartão.");
+        }
+
+        try {
+            CreditCard creditCard = creditCardRepository.findByCardNumber(requestDto.getCardNumber());
+            if (creditCard == null) {
+                return buildStatusErrorResponse(null, "Cartão não encontrado.");
+            }
+
+            User user = creditCard.getUser();
+            if (user == null || user.getId() == null || !user.getId().equals(requestDto.getUserId())) {
+                return buildStatusErrorResponse(creditCard, "Usuário não autorizado para este cartão.");
+            }
+
+            if (!PasswordHashUtil.verifyPassword(requestDto.getUserPassword(), user.getPasswordHash())) {
+                return buildStatusErrorResponse(creditCard, "Senha incorreta.");
+            }
+
+            if (creditCard.getStatus() == desiredStatus) {
+                return CreditCardStatusUpdateResponseDto.builder()
+                        .maskCardNumber(creditCard.getMaskCardNumber())
+                        .status(creditCard.getStatus())
+                        .message(alreadyMessage)
+                        .success(true)
+                        .build();
+            }
+
+            if (!canChangeStatus(creditCard.getStatus(), desiredStatus)) {
+                return buildStatusErrorResponse(creditCard, "Status do cartão não permite esta operação.");
+            }
+
+            creditCard.setStatus(desiredStatus);
+            creditCardRepository.save(creditCard);
+
+            return CreditCardStatusUpdateResponseDto.builder()
+                    .maskCardNumber(creditCard.getMaskCardNumber())
+                    .status(creditCard.getStatus())
+                    .message(successMessage)
+                    .success(true)
+                    .build();
+
+        } catch (Exception e) {
+            return buildStatusErrorResponse(null, "Erro ao alterar status do cartão: " + e.getMessage());
+        }
+    }
+
+    private boolean canChangeStatus(CreditCardStatus currentStatus, CreditCardStatus desiredStatus) {
+        if (currentStatus == null || desiredStatus == null) {
+            return false;
+        }
+
+        if (desiredStatus == CreditCardStatus.BLOCKED) {
+            return currentStatus == CreditCardStatus.ACTIVE;
+        }
+
+        if (desiredStatus == CreditCardStatus.ACTIVE) {
+            return currentStatus == CreditCardStatus.BLOCKED;
+        }
+
+        return false;
+    }
+
+    private CreditCardStatusUpdateResponseDto buildStatusErrorResponse(CreditCard creditCard, String message) {
+        String mask = creditCard != null ? creditCard.getMaskCardNumber() : null;
+        return CreditCardStatusUpdateResponseDto.builder()
+                .maskCardNumber(mask)
+                .status(creditCard != null ? creditCard.getStatus() : null)
+                .message(message)
+                .success(false)
+                .build();
     }
 }

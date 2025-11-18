@@ -3,6 +3,8 @@ package org.jala.university.application.service;
 import org.jala.university.application.dto.CreditCardDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
+import org.jala.university.application.dto.CreditCardStatusUpdateRequestDto;
+import org.jala.university.application.dto.CreditCardStatusUpdateResponseDto;
 import org.jala.university.application.dto.CreditCardUpdateDto;
 import org.jala.university.application.dto.CreditCardUpdateResponseDto;
 import org.jala.university.domain.entity.CreditCard;
@@ -23,4 +25,6 @@ public interface CreditCardService {
     Double calculatePreApprovedLimit(Double monthlyIncome);
     CreditCardUpdateResponseDto updateCreditCardSettings(CreditCardUpdateDto updateDto);
     Double calculateAvailableLimit(UUID creditCardId);
+    CreditCardStatusUpdateResponseDto blockCard(CreditCardStatusUpdateRequestDto requestDto);
+    CreditCardStatusUpdateResponseDto unblockCard(CreditCardStatusUpdateRequestDto requestDto);
 }
