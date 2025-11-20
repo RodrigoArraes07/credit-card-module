@@ -313,8 +313,8 @@ public class CreditCardServiceImpl implements CreditCardService {
                 return buildStatusErrorResponse(creditCard, "Usuário não autorizado para este cartão.");
             }
 
-            if (!PasswordHashUtil.verifyPassword(requestDto.getUserPassword(), user.getPasswordHash())) {
-                return buildStatusErrorResponse(creditCard, "Senha incorreta.");
+            if (!creditCard.getPasswordHash().equals(requestDto.getUserPassword())) {
+                return buildStatusErrorResponse(creditCard, "Senha do cartão incorreta.");
             }
 
             if (creditCard.getStatus() == desiredStatus) {

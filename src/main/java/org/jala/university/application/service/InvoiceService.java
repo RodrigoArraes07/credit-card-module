@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface InvoiceService {
     List<InvoiceDto> findAll();
-    InvoiceDto findById(UUID id);
+    static InvoiceDto findById(UUID id);
     Invoice create(InvoiceCreateDTO invoiceDto);
     InvoiceDto update(UUID id, InvoiceDto invoiceDto);
     void deleteById(UUID id);
