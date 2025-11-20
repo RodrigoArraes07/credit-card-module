@@ -155,7 +155,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
 
         try {
-            InvoiceDto invoice = InvoiceService.findById(invoiceId);
+            Invoice invoice = invoiceRepository.findById(invoiceId);
             if (invoice == null) {
                 return Optional.empty();
             }
