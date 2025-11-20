@@ -101,6 +101,8 @@ public class InvoiceMapper implements Mapper<Invoice, InvoiceCreateDTO> {
                 .closingDate(entity.getClosingDate())
                 .dueDate(entity.getDueDate())
                 .totalAmount(entity.getTotalAmount())
+                .lateFee(entity.getLateFee())
+                .interestCharges(entity.getInterestCharges())
                 .isPaid(entity.getIsPaid())
                 .paymentMethod(entity.getPaymentMethod())
                 .paymentDate(entity.getPaymentDate())

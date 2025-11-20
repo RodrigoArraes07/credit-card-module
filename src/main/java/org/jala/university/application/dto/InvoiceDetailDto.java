@@ -26,6 +26,8 @@ public class InvoiceDetailDto implements Serializable {
     private LocalDate closingDate;
     private LocalDate dueDate;
     private Double totalAmount;
+    private Double lateFee;
+    private Double interestCharges;
     private Boolean isPaid;
     private PaymentMethod paymentMethod;
     private LocalDateTime paymentDate;

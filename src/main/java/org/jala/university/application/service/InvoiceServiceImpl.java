@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
 
+    private static final double LATE_FEE_PERCENTAGE = 0.02; // 2%
+    private static final double DAILY_INTEREST_RATE = 0.001; // 0.1%
+
     private final InvoiceRepository invoiceRepository;
     private final PurchaseInstallmentRepository purchaseInstallmentRepository;
     private final InvoiceMapper invoiceMapper;
@@ -160,6 +163,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 return Optional.empty();
             }
 
+            applyLateCharges(invoice); //aplicar as mudanças de valor devido a atraso
+            invoiceRepository.save(invoice);
+
             List<PurchaseInstallment> installments = purchaseInstallmentRepository.findByInvoiceId(invoiceId);
             List<PurchaseInstallmentDto> installmentDtos = installments.stream()
                     .map(purchaseInstallmentMapper::mapTo)
@@ -204,6 +210,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             return invoices.stream()
                     .sorted((i1, i2) -> i1.getClosingDate().compareTo(i2.getClosingDate()))
                     .map(invoice -> {
+                        applyLateCharges(invoice); //aplicar as mudanças de valor devido a atraso
+                        invoiceRepository.save(invoice);
+
                         List<PurchaseInstallment> installments = purchaseInstallmentRepository.findByInvoiceId(invoice.getId());
                         List<PurchaseInstallmentDto> installmentDtos = installments.stream()
                                 .map(purchaseInstallmentMapper::mapTo)
@@ -282,4 +291,39 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .build();
         }
     }
+
+    /*
+    * CRE-008: Implementar método para aplicar multas e juros em faturas vencidas
+    * Requisitos:
+    * 1. O método deve verificar se a fatura está vencida (data de vencimento anterior à data atual).
+    * 2. Se a fatura estiver vencida, deve calcular uma multa de 2% sobre o valor total da fatura.
+    * 3. Deve calcular juros de 0,1% ao dia sobre o valor total da fatura para cada dia de atraso.
+    * 4. O método deve atualizar os campos de multa e juros na entidade Fatura.
+    * 5. O método deve ser chamado sempre que uma fatura for recuperada para exibição ou processamento de pagamento.
+    * 6. Garantir que o método seja testado através de testes unitários.
+    */
+
+    @Override
+    public void applyLateCharges(Invoice invoice) {
+        if (invoice == null || invoice.getIsPaid() || invoice.getDueDate().isAfter(LocalDate.now())) {
+            // Nada a fazer se a fatura for nula, já paga ou não estiver vencida
+            return;
+        }
+
+        long overdueDays = java.time.temporal.ChronoUnit.DAYS.between(invoice.getDueDate(), LocalDate.now());
+        
+        // esse metodo calcula a diferença em dias entre duas datas, se a data de vencimento for maior que a data atual, o valor será negativo
+        if (overdueDays <= 0) {
+            return;
+        }
+
+        // Calcula a multa uma única vez de acordo com o valor total da fatura.
+        double lateFee = invoice.getTotalAmount() * LATE_FEE_PERCENTAGE;
+        invoice.setLateFee(lateFee);
+
+        // Calcula os juros com base nos dias de atraso acumulados.
+        double interest = invoice.getTotalAmount() * DAILY_INTEREST_RATE * overdueDays;
+        invoice.setInterestCharges(interest);
+    }
+    //essa parte foi feita apartir dos testes criados no InvoiceServiceImplTest.java da CRE-008
 }

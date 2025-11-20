@@ -23,4 +23,5 @@ public interface InvoiceService {
     List<InvoiceDto> getInvoicesByYear(UUID creditCardId, int year);
     List<InvoiceDetailDto> getAllInvoicesByCreditCard(UUID creditCardId);
     PaymentResponseDto processPayment(UUID invoiceId, PaymentMethod method);
+    void applyLateCharges(Invoice invoice); //aplica multas e juros por atraso
 }

@@ -41,6 +41,12 @@ public final class Invoice implements BaseEntity<UUID> {
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount;
 
+    @Column(name = "late_fee")
+    private Double lateFee;
+
+    @Column(name = "interest_charges")
+    private Double interestCharges;
+
     @Column(name = "is_paid", nullable = false)
     private Boolean isPaid;
 
