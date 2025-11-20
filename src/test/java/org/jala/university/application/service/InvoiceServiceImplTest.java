@@ -240,4 +240,23 @@ class InvoiceServiceImplTest {
                 .installments(new ArrayList<>())
                 .build();
     }
+
+    //Tests for CRE-008
+    @Test
+    @DisplayName("CRE-008: Deve calcular multa e juros para fatura vencida")
+    void deveCalcularMultaEJurosParaFaturaVencida() {
+        //uma fatura com valor total de 1000.0, 10 dias de atraso
+        Invoice overdueInvoice = new Invoice();
+        overdueInvoice.setId(UUID.randomUUID());
+        overdueInvoice.setTotalAmount(1000.0);
+        overdueInvoice.setIsPaid(false);
+        overdueInvoice.setDueDate(LocalDate.now().minusDays(10));
+
+        // Act: aplicar multas e juros por atraso
+        invoiceService.applyLateCharges(overdueInvoice);
+
+        // Assert: verificar se as multas e juros foram calculados corretamente
+        assertEquals(20.0, overdueInvoice.getLateFee());
+        assertEquals(10.0, overdueInvoice.getInterestCharges());
+    }
 }
