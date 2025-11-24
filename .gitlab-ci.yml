@@ -20,7 +20,8 @@ before_script:
 build-job:
   stage: build
   script:
-    - mvn -B clean compile
+    - echo -e "\e[34m====== BUILD STAGE STARTED ======\e[0m"
+    - mvn -B clean compile --settings ci_settings.xml
   artifacts:
     paths:
       - target/
@@ -28,11 +29,13 @@ build-job:
 test-job:
   stage: test
   script:
+    - echo -e "\e[34m=== TEST STAGE STARTED ===\e[0m"
     - mvn test
 
 package-job:
   stage: package
   script:
+    - echo -e "\e[34m=== PACKAGE STAGE STARTED ===\e[0m"
     - mvn -B package
   artifacts:
     paths:
