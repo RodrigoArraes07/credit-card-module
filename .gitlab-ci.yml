@@ -21,7 +21,7 @@ build-job:
   stage: build
   script:
     - echo -e "\e[34m====== BUILD STAGE STARTED ======\e[0m"
-    - mvn -B clean compile --settings ci_settings.xml
+    - mvn -B clean install --settings ci_settings.xml
   artifacts:
     paths:
       - target/
