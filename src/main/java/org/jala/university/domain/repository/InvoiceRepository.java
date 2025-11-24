@@ -17,4 +17,5 @@ public interface InvoiceRepository extends Repository<Invoice, UUID> {
     Invoice findNextInvoice(UUID creditCardId, LocalDate referenceDate);
     List<Invoice> findByYear(UUID creditCardId, int year);
     List<Invoice> findFutureInvoicesByCreditCard(CreditCard creditCard, LocalDate currentDate);
+    Invoice findById(UUID id);
 }
