@@ -138,7 +138,7 @@
   <!-- Should be included when add dependency to other gitlab project -->
     <repositories>
       <repository>
-        <id>gitlab-maven</id>
+        <id>commons-module-repo</id>
         <url>https://gitlab.com/api/v4/projects/74923476/packages/maven</url>
       </repository>
     </repositories>
