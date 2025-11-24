@@ -135,13 +135,13 @@
     </dependency>
   </dependencies>
 
-  <!-- Should be included when add dependency to other gitlab project
+  <!-- Should be included when add dependency to other gitlab project -->
     <repositories>
       <repository>
         <id>base-module-repo</id>
-        <url>https://gitlab.com/api/v4/projects/{project_code}/packages/maven</url>
+        <url>https://gitlab.com/api/v4/projects/74923476/packages/maven</url>
       </repository>
-    </repositories> -->
+    </repositories>
   <build>
     <pluginManagement>
       <plugins>
