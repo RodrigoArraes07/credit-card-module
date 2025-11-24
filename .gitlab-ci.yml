@@ -1,0 +1,39 @@
+image: maven:3.9.6-eclipse-temurin-17
+
+stages:
+  - build
+  - test
+  - package
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2"
+
+#Config dependeces in cache m2
+cache:
+  paths:
+    - .m2/repository
+
+before_script:
+  - apt-get update -y
+  - apt-get install -y libgtk-3-0 libgtk-3-dev libx11-dev libxtst-dev libxrender-dev libxi6 libxrandr2
+
+build-job:
+  stage: build
+  script:
+    - mvn -B clean compile
+  artifacts:
+    paths:
+      - target/
+
+test-job:
+  stage: test
+  script:
+    - mvn test
+
+package-job:
+  stage: package
+  script:
+    - mvn -B package
+  artifacts:
+    paths:
+      - target/*.jar
