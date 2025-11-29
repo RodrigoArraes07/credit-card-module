@@ -11,6 +11,7 @@ public enum CreditCardView {
     REQUEST_CARD("credit-card-request-view.fxml"),
     INVOICE_MONTHLY("invoice-monthly-view.fxml"),
     CARD_UPDATE("card-update-view.fxml"),
+    CARD_SECURITY("card-security-view.fxml"),
     MAIN("main-view.fxml");
 
     private final View view;

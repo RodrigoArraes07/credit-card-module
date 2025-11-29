@@ -78,6 +78,7 @@
                                 <Label text="JALA Bank"
                                        style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 700; -fx-letter-spacing: 1;"/>
                                 <Region HBox.hgrow="ALWAYS"/>
+                                <HBox fx:id="cardStatusBadgeContainer" alignment="CENTER_RIGHT" spacing="8"/>
                                 <FontAwesomeIconView glyphName="CREDIT_CARD" size="32" fill="white" opacity="0.9"/>
                             </HBox>
 

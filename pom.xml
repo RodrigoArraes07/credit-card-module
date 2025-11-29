@@ -135,30 +135,27 @@
     </dependency>
   </dependencies>
 
-  <!-- Should be included when add dependency to other gitlab project -->
-  <repositories>
-    <repository>
-      <id>gitlab-maven</id>
-      <url>https://gitlab.com/api/v4/projects/74923570/packages/maven</url>
-    </repository>
-    <repository>
-      <id>commons-module-repo</id>
-      <url>https://gitlab.com/api/v4/projects/74923476/packages/maven</url>
-    </repository>
-  </repositories>
+    <repositories>
+      <repository>
+        <id>gitlab-maven</id>
+        <url>https://gitlab.com/api/v4/projects/74923570/packages/maven</url>
+      </repository>
+        <repository>
+            <id>commons-module-repo</id>
+            <url>https://gitlab.com/api/v4/projects/74923476/packages/maven</url>
+        </repository>
+    </repositories>
 
-  <distributionManagement>
-    <repository>
-      <id>gitlab-maven</id>
-      <url>https://gitlab.com/api/v4/projects/74923570/packages/maven</url>
-    </repository>
-    <snapshotRepository>
-      <id>gitlab-maven</id>
-      <url>https://gitlab.com/api/v4/projects/74923570/packages/maven</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-
+    <distributionManagement>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/74923570/packages/maven</url>
+        </repository>
+        <snapshotRepository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/74923570/packages/maven</url>
+        </snapshotRepository>
+    </distributionManagement>
 
   <build>
     <pluginManagement>

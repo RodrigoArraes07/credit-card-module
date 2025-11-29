@@ -37,4 +37,27 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .map(purchaseMapper::mapTo)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public PurchaseDto findById(UUID id) {
+        Purchase purchase = purchaseRepository.findById(id);
+        return purchase != null ? purchaseMapper.mapTo(purchase) : null;
+    }
+
+    @Override
+    public PurchaseDto create(PurchaseDto purchaseDto) {
+        // Lógica de criação a ser implementada /correção
+        return null;
+    }
+
+    @Override
+    public PurchaseDto update(UUID id, PurchaseDto purchaseDto) {
+        // Lógica de atualização a ser implementada /correção
+        return null;
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        purchaseRepository.deleteById(id); //logica de exclusão /correção
+    }
 }

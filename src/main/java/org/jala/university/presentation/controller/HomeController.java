@@ -17,18 +17,18 @@ import org.jala.university.application.service.UserService;
 import org.jala.university.application.session.SessionManager;
 import org.jala.university.commons.presentation.BaseController;
 import org.jala.university.commons.presentation.ViewSwitcher;
+import org.jala.university.domain.enums.CreditCardStatus;
 import org.jala.university.infrastructure.config.AppConfig;
 import org.jala.university.presentation.CreditCardView;
+import org.jala.university.presentation.components.StatusBadge;
 import org.jala.university.presentation.components.TransactionCard;
+import org.jala.university.presentation.context.CardSecurityContext;
 import org.jala.university.presentation.context.CardUpdateContext;
 import org.jala.university.presentation.context.InvoiceContext;
 import org.jala.university.presentation.context.UserContext;
 
 import java.util.Optional;
-
 import java.text.NumberFormat;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -76,6 +76,9 @@ public class HomeController extends BaseController {
 
     @FXML
     private HBox carouselIndicators;
+
+    @FXML
+    private HBox cardStatusBadgeContainer;
 
     private UUID userId;
     private UserService userService;
@@ -319,6 +322,21 @@ public class HomeController extends BaseController {
             Double availableLimit = creditCardService.calculateAvailableLimit(card.getCredit_card_id());
             availableLimitLabel.setText(formatCurrency(availableLimit));
         }
+
+        updateCardStatusBadge(card);
+    }
+
+    private void updateCardStatusBadge(CreditCardDto card) {
+        if (cardStatusBadgeContainer == null) {
+            return;
+        }
+
+        cardStatusBadgeContainer.getChildren().clear();
+
+        if (card.getStatus() != null && card.getStatus() != CreditCardStatus.ACTIVE) {
+            StatusBadge badge = new StatusBadge(card.getStatus());
+            cardStatusBadgeContainer.getChildren().add(badge);
+        }
     }
 
     private void showAddCardDisplay() {
@@ -365,7 +383,47 @@ public class HomeController extends BaseController {
 
     @FXML
     private void handleBlockCard() {
-        System.out.println("Block card clicked");
+        if (userCards == null || userCards.isEmpty() || currentCardIndex >= userCards.size()) {
+            showErrorAlert("Erro", "Nenhum cartão disponível.");
+            return;
+        }
+
+        if (userId == null) {
+            showErrorAlert("Erro", "Usuário não identificado.");
+            return;
+        }
+
+        CreditCardDto currentCard = userCards.get(currentCardIndex);
+
+        if (currentCard.getStatus() == null) {
+            showErrorAlert("Erro", "Status do cartão não disponível.");
+            return;
+        }
+
+        if (currentCard.getStatus() != CreditCardStatus.ACTIVE &&
+            currentCard.getStatus() != CreditCardStatus.BLOCKED) {
+            showErrorAlert("Operação não permitida",
+                    "Não é possível bloquear/desbloquear cartões com status: " +
+                    currentCard.getStatus());
+            return;
+        }
+
+        CardSecurityContext context = new CardSecurityContext(
+                userId,
+                currentCard.getCardNumber(),
+                currentCard.getMaskCardNumber(),
+                currentCard.getStatus()
+        );
+
+        ViewSwitcher.switchTo(CreditCardView.CARD_SECURITY.getView(), context);
+    }
+
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML

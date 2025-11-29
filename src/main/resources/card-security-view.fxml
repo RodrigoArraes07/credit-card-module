@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.jala.university.presentation.controller.CardSecurityController"
+            stylesheets="@styles/application.css"
+            style="-fx-background-color: #F5F5F5;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15"
+              style="-fx-background-color: white; -fx-padding: 18 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);">
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Circle radius="20" style="-fx-fill: #1565C0;"/>
+                <Label text="JALA Bank" styleClass="text-title"
+                       style="-fx-font-size: 18px; -fx-font-weight: 700;"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label fx:id="headerTitle" text="Segurança do Cartão"
+                   style="-fx-font-size: 16px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button text="Voltar" styleClass="button-secondary" onAction="#handleBack"
+                    style="-fx-pref-width: 120; -fx-pref-height: 42;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" style="-fx-background-color: #F5F5F5;">
+            <HBox alignment="CENTER" style="-fx-padding: 40;">
+                <VBox spacing="30" style="-fx-max-width: 700; -fx-min-width: 700;">
+
+                    <VBox spacing="20" styleClass="card" style="-fx-padding: 40; -fx-alignment: CENTER;">
+                        <StackPane>
+                            <Circle fx:id="iconCircle" radius="50" style="-fx-fill: #FFEBEE;"/>
+                            <FontAwesomeIconView fx:id="mainIcon" glyphName="LOCK" size="48" fill="#D32F2F"/>
+                        </StackPane>
+
+                        <Label fx:id="actionTitle" text="Bloquear Cartão"
+                               style="-fx-font-size: 26px; -fx-text-fill: #D32F2F; -fx-font-weight: 700;"/>
+
+                        <Label fx:id="actionSubtitle" text="Bloqueie temporariamente seu cartão para maior segurança"
+                               style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-text-alignment: center;"
+                               wrapText="true" maxWidth="550"/>
+                    </VBox>
+
+                    <VBox spacing="20" styleClass="card" style="-fx-padding: 35;">
+                        <Label text="Informações do Cartão"
+                               style="-fx-font-size: 16px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+
+                        <Separator style="-fx-background-color: #E0E0E0;"/>
+
+                        <VBox spacing="12" style="-fx-padding: 10 0;">
+                            <HBox alignment="CENTER_LEFT" spacing="15">
+                                <Label text="Número do Cartão:"
+                                       style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-min-width: 150;"/>
+                                <Label fx:id="cardNumberLabel" text="•••• •••• •••• 1234"
+                                       style="-fx-font-size: 16px; -fx-text-fill: #212121; -fx-font-weight: 600; -fx-letter-spacing: 2;"/>
+                            </HBox>
+
+                            <HBox alignment="CENTER_LEFT" spacing="15">
+                                <Label text="Status Atual:"
+                                       style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-min-width: 150;"/>
+                                <HBox fx:id="currentStatusBadgeContainer" alignment="CENTER_LEFT"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <VBox fx:id="warningBox" spacing="15" styleClass="card"
+                          style="-fx-padding: 25; -fx-background-color: #FFEBEE; -fx-border-color: #D32F2F; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-radius: 12;">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <FontAwesomeIconView glyphName="EXCLAMATION_TRIANGLE" size="24" fill="#D32F2F"/>
+                            <Label text="Atenção"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #D32F2F; -fx-font-weight: 700;"/>
+                        </HBox>
+
+                        <Label fx:id="warningMessage" text="Ao bloquear, o cartão não poderá ser usado até ser desbloqueado."
+                               style="-fx-font-size: 14px; -fx-text-fill: #424242;"
+                               wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="25" styleClass="card" style="-fx-padding: 40;">
+                        <Label text="Confirme sua Identidade"
+                               style="-fx-font-size: 18px; -fx-text-fill: #424242; -fx-font-weight: 600; -fx-alignment: CENTER;"
+                               maxWidth="Infinity"/>
+
+                        <Label text="Para sua segurança, digite a senha de 4 dígitos do cartão"
+                               style="-fx-font-size: 13px; -fx-text-fill: #757575; -fx-text-alignment: center;"
+                               wrapText="true" maxWidth="550" alignment="CENTER"/>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-max-width: 400;">
+                            <Label text="Senha do Cartão (4 dígitos)"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #616161; -fx-font-weight: 600;"
+                                   alignment="CENTER_LEFT" maxWidth="Infinity"/>
+                            <VBox fx:id="passwordFieldContainer" alignment="CENTER" spacing="0"/>
+                            <Label fx:id="passwordError" text="" styleClass="label-error"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #D32F2F; -fx-font-weight: 500;"
+                                   visible="false" managed="false"/>
+                        </VBox>
+
+                        <HBox spacing="15" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                            <Button text="Cancelar" styleClass="button-secondary"
+                                    onAction="#handleBack"
+                                    style="-fx-pref-width: 180; -fx-pref-height: 50; -fx-font-size: 15px;"/>
+                            <Button fx:id="confirmButton" text="Confirmar Bloqueio" styleClass="button-primary"
+                                    onAction="#handleConfirm"
+                                    style="-fx-pref-width: 220; -fx-pref-height: 50; -fx-font-size: 15px; -fx-background-color: #D32F2F;"/>
+                        </HBox>
+                    </VBox>
+
+                </VBox>
+            </HBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
