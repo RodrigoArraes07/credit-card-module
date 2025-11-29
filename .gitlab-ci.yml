@@ -1,29 +1,24 @@
 image: maven:3.9.6-eclipse-temurin-17
 
-variables:
-  MAVEN_OPTS: >-
-    -Dhttps.protocols=TLSv1.2
-    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-    -Dorg.slf4j.simpleLogger.showDateTime=true
-    -Djava.awt.headless=true
-
-  MAVEN_CLI_OPTS: >-
-    --batch-mode
-    --errors
-    --fail-at-end
-    --show-version
-    --no-transfer-progress
-    -DinstallAtEnd=true
-    -DdeployAtEnd=true
-    --settings ci_settings.xml
-
-  GITLAB_PRIVATE_TOKEN: $GITLAB_PRIVATE_TOKEN
-
 stages:
   - build
   - test
   - package
 
+
+
+variables:
+  MAVEN_OPTS: >-
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2"
+
+  MAVEN_CLI_OPTS: >-
+    -B
+    -q
+    --fail-at-end
+    --no-transfer-progress
+    -DinstallAtEnd=true
+    -DdeployAtEnd=true
+    --settings ci_settings.xml
 
 #Config dependeces in cache m2
 cache:
@@ -37,8 +32,7 @@ before_script:
 build-job:
   stage: build
   script:
-    - echo -e "\e[34m====== BUILD STAGE STARTED ======\e[0m"
-    - mvn -B clean install --settings ci_settings.xml
+    - mvn $MAVEN_CLI_OPTS -B clean compile
   artifacts:
     paths:
       - target/
@@ -47,13 +41,13 @@ test-job:
   stage: test
   script:
     - echo -e "\e[34m=== TEST STAGE STARTED ===\e[0m"
-    - mvn test
+    - mvn $MAVEN_CLI_OPTS test
 
 package-job:
   stage: package
   script:
     - echo -e "\e[34m=== PACKAGE STAGE STARTED ===\e[0m"
-    - mvn -B package
+    - mvn $MAVEN_CLI_OPTS -B package
   artifacts:
     paths:
       - target/*.jar
