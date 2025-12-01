@@ -4,6 +4,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.effect.ColorAdjust?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
@@ -17,8 +20,12 @@
 
             <VBox alignment="CENTER" spacing="18">
                 <StackPane>
-                    <Circle radius="45" style="-fx-fill: #1565C0;"/>
-                    <FontAwesomeIconView glyphName="CREDIT_CARD" size="42" fill="white"/>
+                    <Circle radius="50" style="-fx-fill: #1565C0;"/>
+                    <ImageView fitWidth="70" fitHeight="70" preserveRatio="true">
+                        <image>
+                            <Image url="@assets/jala-uni.png"/>
+                        </image>
+                    </ImageView>
                 </StackPane>
 
                 <VBox alignment="CENTER" spacing="6">

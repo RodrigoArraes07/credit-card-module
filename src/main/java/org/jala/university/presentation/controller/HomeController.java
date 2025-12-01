@@ -377,8 +377,27 @@ public class HomeController extends BaseController {
     }
 
     @FXML
-    private void handleVirtualCard() {
-        System.out.println("Virtual card clicked");
+    private void handleChangePassword() {
+        if (userCards == null || userCards.isEmpty() || currentCardIndex >= userCards.size()) {
+            showErrorAlert("Erro", "Nenhum cartão disponível.");
+            return;
+        }
+
+        if (userId == null) {
+            showErrorAlert("Erro", "Usuário não identificado.");
+            return;
+        }
+
+        CreditCardDto currentCard = userCards.get(currentCardIndex);
+
+        CardSecurityContext context = new CardSecurityContext(
+                userId,
+                currentCard.getCardNumber(),
+                currentCard.getMaskCardNumber(),
+                currentCard.getStatus()
+        );
+
+        ViewSwitcher.switchTo(CreditCardView.CARD_PASSWORD_UPDATE.getView(), context);
     }
 
     @FXML

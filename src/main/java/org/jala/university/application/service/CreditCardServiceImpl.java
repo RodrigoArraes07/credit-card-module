@@ -203,6 +203,8 @@ public class CreditCardServiceImpl implements CreditCardService {
                     return buildUpdateErrorResponse("Dia de vencimento inválido. Use múltiplos de 5 (5, 10, 15, 20, 25, 30).");
                 }
 
+                creditCard.setDueDay(updateDto.getNewDueDay());
+
                 List<Invoice> futureInvoices = invoiceRepository.findFutureInvoicesByCreditCard(creditCard, LocalDate.now());
                 int requestedDay = updateDto.getNewDueDay();
                 for (Invoice invoice : futureInvoices) {
@@ -216,7 +218,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 dueDateUpdated = true;
             }
 
-            if (limitUpdated) {
+            if (limitUpdated || dueDateUpdated) {
                 creditCardRepository.save(creditCard);
             }
 

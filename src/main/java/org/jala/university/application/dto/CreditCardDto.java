@@ -27,4 +27,5 @@ public class CreditCardDto implements Serializable {
     private Integer cvc;
     private String passwordHash;
     private CreditCardStatus status;
+    private Integer dueDay;
 }

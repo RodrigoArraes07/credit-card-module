@@ -39,6 +39,7 @@ public class CreditCardMapper implements Mapper<CreditCard, CreditCardDto> {
                 .cvc(input.getCvc())
                 .passwordHash(input.getPasswordHash())
                 .status(input.getStatus())
+                .dueDay(input.getDueDay())
                 .build();
     }
 
@@ -51,6 +52,7 @@ public class CreditCardMapper implements Mapper<CreditCard, CreditCardDto> {
                 .limitAmount(input.getLimitAmount())
                 .targetType(input.getTargetType())
                 .cvc(input.getCvc())
+                .dueDay(input.getDueDay())
                 .build();
     }
 }

@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
@@ -17,7 +19,14 @@
               style="-fx-background-color: white; -fx-padding: 18 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);">
 
             <HBox alignment="CENTER_LEFT" spacing="12">
-                <Circle radius="20" style="-fx-fill: #1565C0;"/>
+                <StackPane>
+                    <Circle radius="20" style="-fx-fill: #1565C0;"/>
+                    <ImageView fitWidth="28" fitHeight="28" preserveRatio="true">
+                        <image>
+                            <Image url="@assets/jala-uni.png"/>
+                        </image>
+                    </ImageView>
+                </StackPane>
                 <Label text="JALA Bank" styleClass="text-title"
                        style="-fx-font-size: 18px; -fx-font-weight: 700;"/>
             </HBox>
@@ -167,13 +176,13 @@
                         </VBox>
 
                         <VBox alignment="CENTER" spacing="12" GridPane.columnIndex="1"
-                              onMouseClicked="#handleVirtualCard" styleClass="card"
+                              onMouseClicked="#handleChangePassword" styleClass="card"
                               style="-fx-cursor: hand; -fx-padding: 20 15;">
                             <StackPane>
-                                <Circle radius="28" style="-fx-fill: #E3F2FD;"/>
-                                <FontAwesomeIconView glyphName="CREDIT_CARD_ALT" size="24" fill="#1565C0"/>
+                                <Circle radius="28" style="-fx-fill: #EDE7F6;"/>
+                                <FontAwesomeIconView glyphName="KEY" size="24" fill="#7B1FA2"/>
                             </StackPane>
-                            <Label text="Cartão Virtual"
+                            <Label text="Alterar Senha"
                                    wrapText="true" textAlignment="CENTER"
                                    style="-fx-font-size: 12px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
                         </VBox>
