@@ -2,6 +2,8 @@ package org.jala.university.application.service;
 
 import lombok.AllArgsConstructor;
 import org.jala.university.application.dto.CreditCardDto;
+import org.jala.university.application.dto.CreditCardPasswordUpdateRequestDto;
+import org.jala.university.application.dto.CreditCardPasswordUpdateResponseDto;
 import org.jala.university.application.dto.CreditCardRequestDto;
 import org.jala.university.application.dto.CreditCardResponseDto;
 import org.jala.university.application.dto.CreditCardStatusUpdateRequestDto;
@@ -17,6 +19,8 @@ import org.jala.university.domain.enums.TargetType;
 import org.jala.university.domain.repository.CreditCardRepository;
 import org.jala.university.domain.repository.InvoiceRepository;
 import org.jala.university.infrastructure.util.PasswordHashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -26,6 +30,8 @@ import java.util.UUID;
 
 @AllArgsConstructor
 public class CreditCardServiceImpl implements CreditCardService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreditCardServiceImpl.class);
+
     private CreditCardRepository creditCardRepository;
     private CreditCardMapper creditCardMapper;
     private InvoiceRepository invoiceRepository;
@@ -197,6 +203,8 @@ public class CreditCardServiceImpl implements CreditCardService {
                     return buildUpdateErrorResponse("Dia de vencimento inválido. Use múltiplos de 5 (5, 10, 15, 20, 25, 30).");
                 }
 
+                creditCard.setDueDay(updateDto.getNewDueDay());
+
                 List<Invoice> futureInvoices = invoiceRepository.findFutureInvoicesByCreditCard(creditCard, LocalDate.now());
                 int requestedDay = updateDto.getNewDueDay();
                 for (Invoice invoice : futureInvoices) {
@@ -210,7 +218,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 dueDateUpdated = true;
             }
 
-            if (limitUpdated) {
+            if (limitUpdated || dueDateUpdated) {
                 creditCardRepository.save(creditCard);
             }
 
@@ -364,6 +372,87 @@ public class CreditCardServiceImpl implements CreditCardService {
     private CreditCardStatusUpdateResponseDto buildStatusErrorResponse(CreditCard creditCard, String message) {
         String mask = creditCard != null ? creditCard.getMaskCardNumber() : null;
         return CreditCardStatusUpdateResponseDto.builder()
+                .maskCardNumber(mask)
+                .status(creditCard != null ? creditCard.getStatus() : null)
+                .message(message)
+                .success(false)
+                .build();
+    }
+
+    @Override
+    public CreditCardPasswordUpdateResponseDto updateCardPassword(CreditCardPasswordUpdateRequestDto requestDto) {
+        if (requestDto == null
+                || requestDto.getUserId() == null
+                || requestDto.getUserLoginPassword() == null
+                || requestDto.getCardNumber() == null
+                || requestDto.getNewPassword() == null
+                || requestDto.getConfirmNewPassword() == null) {
+            return buildPasswordErrorResponse(null, "Dados inválidos para atualizar senha do cartão.");
+        }
+
+        if (!requestDto.getNewPassword().equals(requestDto.getConfirmNewPassword())) {
+            return buildPasswordErrorResponse(null, "As senhas não conferem.");
+        }
+
+        if (!isFourDigitNumeric(requestDto.getNewPassword())) {
+            return buildPasswordErrorResponse(null, "A nova senha deve conter exatamente 4 dígitos numéricos.");
+        }
+
+        try {
+            CreditCard creditCard = creditCardRepository.findByCardNumber(requestDto.getCardNumber());
+            if (creditCard == null) {
+                return buildPasswordErrorResponse(null, "Cartão não encontrado.");
+            }
+
+            User user = creditCard.getUser();
+            if (user == null || user.getId() == null || !user.getId().equals(requestDto.getUserId())) {
+                return buildPasswordErrorResponse(creditCard, "Usuário não autorizado para este cartão.");
+            }
+
+            if (!PasswordHashUtil.verifyPassword(requestDto.getUserLoginPassword(), user.getPasswordHash())) {
+                return buildPasswordErrorResponse(creditCard, "Senha de login inválida.");
+            }
+
+            if (creditCard.getPasswordHash() != null
+                    && creditCard.getPasswordHash().equals(requestDto.getNewPassword())) {
+                return buildPasswordErrorResponse(creditCard, "A nova senha não pode ser igual à senha atual.");
+            }
+
+            String hashedPassword = PasswordHashUtil.hashPassword(requestDto.getNewPassword());
+            creditCard.setPasswordHash(hashedPassword);
+            creditCardRepository.save(creditCard);
+
+            LOGGER.info("Card password updated for card {} and user {}",
+                    creditCard.getMaskCardNumber(), user.getId());
+
+            return CreditCardPasswordUpdateResponseDto.builder()
+                    .maskCardNumber(creditCard.getMaskCardNumber())
+                    .status(creditCard.getStatus())
+                    .message("Senha do cartão atualizada com sucesso!")
+                    .success(true)
+                    .build();
+
+        } catch (Exception e) {
+            LOGGER.error("Error updating card password: {}", e.getMessage());
+            return buildPasswordErrorResponse(null, "Erro ao atualizar senha do cartão: " + e.getMessage());
+        }
+    }
+
+    private boolean isFourDigitNumeric(String password) {
+        if (password == null || password.length() != 4) {
+            return false;
+        }
+        for (char c : password.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private CreditCardPasswordUpdateResponseDto buildPasswordErrorResponse(CreditCard creditCard, String message) {
+        String mask = creditCard != null ? creditCard.getMaskCardNumber() : null;
+        return CreditCardPasswordUpdateResponseDto.builder()
                 .maskCardNumber(mask)
                 .status(creditCard != null ? creditCard.getStatus() : null)
                 .message(message)

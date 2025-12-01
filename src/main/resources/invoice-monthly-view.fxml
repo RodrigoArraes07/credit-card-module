@@ -136,16 +136,7 @@
                     </columnConstraints>
 
                     <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="0"
-                          onMouseClicked="#handleInstallPurchase" styleClass="card"
-                          style="-fx-cursor: hand; -fx-padding: 18 12;">
-                        <StackPane>
-                            <Circle radius="24" style="-fx-fill: #FFF3E0;"/>
-                            <FontAwesomeIconView glyphName="PERCENT" size="20" fill="#F57C00"/>
-                        </StackPane>
-                        <Label text="Parcelar" wrapText="true" textAlignment="CENTER"
-                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
-                        <Label text="Compra" wrapText="true" textAlignment="CENTER"
-                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                          styleClass="card" style="-fx-padding: 18 12; -fx-min-height: 100;">
                     </VBox>
 
                     <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="1"
@@ -175,16 +166,7 @@
                     </VBox>
 
                     <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="3"
-                          onMouseClicked="#handleBarcode" styleClass="card"
-                          style="-fx-cursor: hand; -fx-padding: 18 12;">
-                        <StackPane>
-                            <Circle radius="24" style="-fx-fill: #F5F5F5;"/>
-                            <FontAwesomeIconView glyphName="BARCODE" size="20" fill="#616161"/>
-                        </StackPane>
-                        <Label text="Código" wrapText="true" textAlignment="CENTER"
-                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
-                        <Label text="Barras" wrapText="true" textAlignment="CENTER"
-                               style="-fx-font-size: 11px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                          styleClass="card" style="-fx-padding: 18 12; -fx-min-height: 100;">
                     </VBox>
                 </GridPane>
 

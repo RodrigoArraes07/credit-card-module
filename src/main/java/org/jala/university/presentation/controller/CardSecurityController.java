@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import org.jala.university.application.dto.CreditCardPasswordUpdateRequestDto;
+import org.jala.university.application.dto.CreditCardPasswordUpdateResponseDto;
 import org.jala.university.application.dto.CreditCardStatusUpdateRequestDto;
 import org.jala.university.application.dto.CreditCardStatusUpdateResponseDto;
 import org.jala.university.application.service.CreditCardService;
@@ -220,6 +222,20 @@ public class CardSecurityController extends BaseController {
         passwordError.setVisible(false);
         passwordError.setManaged(false);
         passwordField.setError(false);
+    }
+
+    public CreditCardPasswordUpdateResponseDto changeCardPassword(String userLoginPassword,
+                                                                  String newPassword,
+                                                                  String confirmNewPassword) {
+        CreditCardPasswordUpdateRequestDto requestDto = CreditCardPasswordUpdateRequestDto.builder()
+                .userId(userId)
+                .userLoginPassword(userLoginPassword)
+                .cardNumber(cardNumber)
+                .newPassword(newPassword)
+                .confirmNewPassword(confirmNewPassword)
+                .build();
+
+        return creditCardService.updateCardPassword(requestDto);
     }
 
     @FXML

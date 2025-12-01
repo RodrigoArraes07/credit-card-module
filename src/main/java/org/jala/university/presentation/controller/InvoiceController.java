@@ -25,6 +25,7 @@ import org.jala.university.presentation.components.PaymentInstructionsDialog;
 import org.jala.university.presentation.components.PaymentMethodDialog;
 import org.jala.university.presentation.components.invoice.InstallmentCard;
 import org.jala.university.presentation.components.invoice.TimelineGraph;
+import org.jala.university.presentation.context.CardSecurityContext;
 import org.jala.university.presentation.context.InvoiceContext;
 import org.jala.university.presentation.context.UserContext;
 import org.jala.university.presentation.utils.CurrencyFormatter;
@@ -698,7 +699,27 @@ public class InvoiceController extends BaseController {
 
     @FXML
     private void handleProtectCard() {
-        System.out.println("Protect card");
+        if (userId == null || creditCardId == null) {
+            showErrorAlert("Erro", "Informações do cartão não disponíveis.");
+            return;
+        }
+
+        int cardIndex = findCardIndex(creditCardId);
+        if (cardIndex < 0 || userCards == null || cardIndex >= userCards.size()) {
+            showErrorAlert("Erro", "Cartão não encontrado.");
+            return;
+        }
+
+        CreditCardDto currentCard = userCards.get(cardIndex);
+
+        CardSecurityContext context = new CardSecurityContext(
+                userId,
+                currentCard.getCardNumber(),
+                currentCard.getMaskCardNumber(),
+                currentCard.getStatus()
+        );
+
+        ViewSwitcher.switchTo(CreditCardView.CARD_SECURITY.getView(), context);
     }
 
     @FXML

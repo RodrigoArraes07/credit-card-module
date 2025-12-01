@@ -205,6 +205,9 @@ public class CardUpdateController extends BaseController {
     }
 
     private Integer getCurrentDueDay() {
+        if (currentCard != null && currentCard.getDueDay() != null) {
+            return currentCard.getDueDay();
+        }
         return 10;
     }
 

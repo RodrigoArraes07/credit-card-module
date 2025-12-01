@@ -61,6 +61,9 @@ public final class CreditCard implements BaseEntity<UUID> {
     @Enumerated(EnumType.STRING)
     private CreditCardStatus status;
 
+    @Column(name = "due_day")
+    private Integer dueDay;
+
     @CreatedDate
     private Date createdDate;
 
