@@ -16,111 +16,117 @@
             style="-fx-background-color: linear-gradient(to bottom, #FFFFFF 0%, #F5F5F5 100%);">
 
     <center>
-        <VBox alignment="CENTER" spacing="35" maxWidth="440" style="-fx-padding: 50 40;">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-background: transparent;">
+            <content>
+                <StackPane alignment="CENTER">
+                    <VBox alignment="CENTER" spacing="35" maxWidth="440" style="-fx-padding: 50 40;">
 
-            <VBox alignment="CENTER" spacing="18">
-                <StackPane>
-                    <Circle radius="50" style="-fx-fill: #1565C0;"/>
-                    <ImageView fitWidth="70" fitHeight="70" preserveRatio="true">
-                        <image>
-                            <Image url="@assets/jala-uni.png"/>
-                        </image>
-                    </ImageView>
+                        <VBox alignment="CENTER" spacing="18">
+                            <StackPane>
+                                <Circle radius="50" style="-fx-fill: #1565C0;"/>
+                                <ImageView fitWidth="70" fitHeight="70" preserveRatio="true">
+                                    <image>
+                                        <Image url="@assets/jala-uni.png"/>
+                                    </image>
+                                </ImageView>
+                            </StackPane>
+
+                            <VBox alignment="CENTER" spacing="6">
+                                <Label text="JALA Bank"
+                                       style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: #1565C0; -fx-letter-spacing: 1;"/>
+                                <Label text="Credit Card Management"
+                                       style="-fx-font-size: 15px; -fx-text-fill: #616161; -fx-font-weight: 500;"/>
+                            </VBox>
+
+                            <Label text="Faça login para continuar"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #757575;"/>
+                        </VBox>
+
+                        <VBox spacing="22" styleClass="card" style="-fx-padding: 30;">
+
+                            <VBox spacing="10">
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <FontAwesomeIconView glyphName="USER" size="16" fill="#616161"/>
+                                    <Label text="CPF"
+                                           style="-fx-font-size: 13px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                                </HBox>
+                                <TextField fx:id="cpfField"
+                                           promptText="Digite seu CPF"
+                                           style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14; -fx-font-size: 14px;"/>
+                            </VBox>
+
+                            <VBox spacing="10">
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <FontAwesomeIconView glyphName="LOCK" size="16" fill="#616161"/>
+                                    <Label text="Senha"
+                                           style="-fx-font-size: 13px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
+                                </HBox>
+                                <StackPane>
+                                    <PasswordField fx:id="passwordField"
+                                                   promptText="Digite sua senha"
+                                                   style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14 45 14 14; -fx-font-size: 14px;"/>
+                                    <TextField fx:id="passwordTextField"
+                                               promptText="Digite sua senha"
+                                               visible="false"
+                                               style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14 45 14 14; -fx-font-size: 14px;"/>
+                                    <Button fx:id="togglePasswordButton" onAction="#handleTogglePassword"
+                                            StackPane.alignment="CENTER_RIGHT"
+                                            pickOnBounds="false"
+                                            style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 8; -fx-margin: 0 8 0 0;">
+                                        <graphic>
+                                            <FontAwesomeIconView fx:id="togglePasswordIcon" glyphName="EYE_SLASH" size="16" fill="#9E9E9E"/>
+                                        </graphic>
+                                    </Button>
+                                </StackPane>
+                            </VBox>
+
+                            <CheckBox fx:id="rememberMeCheckBox"
+                                      text="Lembrar-me"
+                                      style="-fx-font-size: 13px; -fx-text-fill: #616161; -fx-font-weight: 500;"/>
+
+                            <Label fx:id="errorLabel"
+                                   text=""
+                                   wrapText="true"
+                                   style="-fx-text-fill: #D32F2F; -fx-font-size: 13px; -fx-font-weight: 600; -fx-padding: 4 0;"/>
+
+                            <Button text="Entrar" styleClass="button-primary"
+                                    onAction="#handleLogin"
+                                    maxWidth="Infinity"
+                                    style="-fx-pref-height: 52; -fx-font-size: 16px;">
+                                <cursor>
+                                    <javafx.scene.Cursor fx:constant="HAND"/>
+                                </cursor>
+                            </Button>
+                        </VBox>
+
+                        <VBox alignment="CENTER" spacing="15">
+                            <Separator maxWidth="320" style="-fx-background-color: #E0E0E0;"/>
+
+                            <VBox alignment="CENTER" spacing="8">
+                                <Label text="Ainda não possui cartão?"
+                                       style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-font-weight: 500;"/>
+
+                                <Button styleClass="button-secondary"
+                                        onAction="#handleRequestCard"
+                                        style="-fx-pref-width: 200; -fx-pref-height: 48; -fx-font-size: 14px;">
+                                    <graphic>
+                                        <HBox spacing="8" alignment="CENTER">
+                                            <FontAwesomeIconView glyphName="PLUS_CIRCLE" size="16" fill="#1565C0"/>
+                                            <Label text="Solicitar Cartão"
+                                                   style="-fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
+                                        </HBox>
+                                    </graphic>
+                                    <cursor>
+                                        <javafx.scene.Cursor fx:constant="HAND"/>
+                                    </cursor>
+                                </Button>
+                            </VBox>
+                        </VBox>
+                    </VBox>
                 </StackPane>
-
-                <VBox alignment="CENTER" spacing="6">
-                    <Label text="JALA Bank"
-                           style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: #1565C0; -fx-letter-spacing: 1;"/>
-                    <Label text="Credit Card Management"
-                           style="-fx-font-size: 15px; -fx-text-fill: #616161; -fx-font-weight: 500;"/>
-                </VBox>
-
-                <Label text="Faça login para continuar"
-                       style="-fx-font-size: 14px; -fx-text-fill: #757575;"/>
-            </VBox>
-
-            <VBox spacing="22" styleClass="card" style="-fx-padding: 30;">
-
-                <VBox spacing="10">
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <FontAwesomeIconView glyphName="USER" size="16" fill="#616161"/>
-                        <Label text="CPF"
-                               style="-fx-font-size: 13px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
-                    </HBox>
-                    <TextField fx:id="cpfField"
-                               promptText="Digite seu CPF"
-                               style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14; -fx-font-size: 14px;"/>
-                </VBox>
-
-                <VBox spacing="10">
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <FontAwesomeIconView glyphName="LOCK" size="16" fill="#616161"/>
-                        <Label text="Senha"
-                               style="-fx-font-size: 13px; -fx-text-fill: #424242; -fx-font-weight: 600;"/>
-                    </HBox>
-                    <StackPane>
-                        <PasswordField fx:id="passwordField"
-                                       promptText="Digite sua senha"
-                                       style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14 45 14 14; -fx-font-size: 14px;"/>
-                        <TextField fx:id="passwordTextField"
-                                   promptText="Digite sua senha"
-                                   visible="false"
-                                   style="-fx-pref-height: 52; -fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14 45 14 14; -fx-font-size: 14px;"/>
-                        <Button fx:id="togglePasswordButton" onAction="#handleTogglePassword"
-                                StackPane.alignment="CENTER_RIGHT"
-                                pickOnBounds="false"
-                                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 8; -fx-margin: 0 8 0 0;">
-                            <graphic>
-                                <FontAwesomeIconView fx:id="togglePasswordIcon" glyphName="EYE_SLASH" size="16" fill="#9E9E9E"/>
-                            </graphic>
-                        </Button>
-                    </StackPane>
-                </VBox>
-
-                <CheckBox fx:id="rememberMeCheckBox"
-                          text="Lembrar-me"
-                          style="-fx-font-size: 13px; -fx-text-fill: #616161; -fx-font-weight: 500;"/>
-
-                <Label fx:id="errorLabel"
-                       text=""
-                       wrapText="true"
-                       style="-fx-text-fill: #D32F2F; -fx-font-size: 13px; -fx-font-weight: 600; -fx-padding: 4 0;"/>
-
-                <Button text="Entrar" styleClass="button-primary"
-                        onAction="#handleLogin"
-                        maxWidth="Infinity"
-                        style="-fx-pref-height: 52; -fx-font-size: 16px;">
-                    <cursor>
-                        <javafx.scene.Cursor fx:constant="HAND"/>
-                    </cursor>
-                </Button>
-            </VBox>
-
-            <VBox alignment="CENTER" spacing="15">
-                <Separator maxWidth="320" style="-fx-background-color: #E0E0E0;"/>
-
-                <VBox alignment="CENTER" spacing="8">
-                    <Label text="Ainda não possui cartão?"
-                           style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-font-weight: 500;"/>
-
-                    <Button styleClass="button-secondary"
-                            onAction="#handleRequestCard"
-                            style="-fx-pref-width: 200; -fx-pref-height: 48; -fx-font-size: 14px;">
-                        <graphic>
-                            <HBox spacing="8" alignment="CENTER">
-                                <FontAwesomeIconView glyphName="PLUS_CIRCLE" size="16" fill="#1565C0"/>
-                                <Label text="Solicitar Cartão"
-                                       style="-fx-text-fill: #1565C0; -fx-font-weight: 600;"/>
-                            </HBox>
-                        </graphic>
-                        <cursor>
-                            <javafx.scene.Cursor fx:constant="HAND"/>
-                        </cursor>
-                    </Button>
-                </VBox>
-            </VBox>
-
-        </VBox>
+            </content>
+        </ScrollPane>
     </center>
 
     <bottom>
