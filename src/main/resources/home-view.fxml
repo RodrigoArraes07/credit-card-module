@@ -150,7 +150,16 @@
                           style="-fx-padding: 20 25;">
                         <Label text="Limite Disponível"
                                style="-fx-font-size: 15px; -fx-text-fill: #757575; -fx-font-weight: 500;"/>
+
                         <Region HBox.hgrow="ALWAYS"/>
+<!--                        <Button text="Aumentar Limite" styleClass="button-secondary"-->
+<!--                                onAction="#increaseCardLimit"-->
+<!--                                maxWidth="Infinity"-->
+<!--                                style="-fx-pref-height: 48; -fx-font-size: 14px;">-->
+<!--                            <padding>-->
+<!--                                <Insets top="12" right="20" bottom="12" left="20"/>-->
+<!--                            </padding>-->
+<!--                        </Button>-->
                         <Label fx:id="availableLimitLabel" text="R$ 5.000,00" styleClass="label-value"
                                style="-fx-font-size: 24px;"/>
                     </HBox>

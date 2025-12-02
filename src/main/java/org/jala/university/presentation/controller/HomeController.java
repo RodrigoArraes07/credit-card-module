@@ -493,4 +493,10 @@ public class HomeController extends BaseController {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         return formatter.format(value);
     }
+
+    @FXML
+    private void increaseCardLimit(){
+        System.out.println("Increase card limit clicked");
+
+    }
 }
