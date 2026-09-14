@@ -55,7 +55,7 @@ public final class CreditCard implements BaseEntity<UUID> {
     @Column(nullable = false, length = 3)
     private Integer cvc;
 
-    @Column(name = "password_hash", nullable = false, length = 4)
+    @Column(name = "password_hash", nullable = false, length = 60)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)

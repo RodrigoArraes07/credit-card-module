@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface JALA Bank - Apresentação</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100vh;
+            padding: 50px 80px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Slide Number */
+        .slide-number {
+            position: absolute;
+            top: 30px;
+            right: 60px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        /* Title Styles */
+        .slide-title {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .slide-title i {
+            color: #4A90E2;
+            font-size: 42px;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(74,144,226,0.3);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* List */
+        .tech-list {
+            list-style: none;
+        }
+
+        .tech-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 15px;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .tech-list li:last-child {
+            border-bottom: none;
+        }
+
+        .tech-list li:hover {
+            padding-left: 8px;
+            color: #4A90E2;
+        }
+
+        .tech-list li i {
+            color: #4A90E2;
+            font-size: 14px;
+            width: 18px;
+        }
+
+        .tech-list li strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Highlight Box */
+        .highlight {
+            background: linear-gradient(135deg, rgba(74,144,226,0.15) 0%, rgba(53,122,189,0.15) 100%);
+            border-left: 4px solid #4A90E2;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+        }
+
+        .highlight p {
+            font-size: 16px;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.5;
+        }
+
+        .highlight strong {
+            color: #4A90E2;
+            font-weight: 700;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 18px 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            background: rgba(74,144,226,0.1);
+            border-color: rgba(74,144,226,0.3);
+            transform: scale(1.05);
+        }
+
+        .feature-item i {
+            font-size: 24px;
+            color: #4A90E2;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .feature-item strong {
+            display: block;
+            font-size: 13px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .feature-item span {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Dots Navigation */
+        .dots {
+            position: fixed;
+            bottom: 40px;
+            right: 60px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: #4A90E2;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide.active .slide-title {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .slide.active .card {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .slide.active .highlight {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        /* Two Column Layout */
+        .two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .col-section h3 {
+            font-size: 20px;
+            color: #4A90E2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .col-section h3 i {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+
+        <!-- Slide 1: Tecnologias e Estrutura -->
+        <div class="slide active">
+            <div class="slide-number">01 / 02</div>
+
+            <h1 class="slide-title">
+                <i class="fa-solid fa-code"></i>
+                Tecnologias & Arquitetura
+            </h1>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <h2 class="card-title">Stack Frontend</h2>
+                    </div>
+                    <ul class="tech-list">
+                        <li>
+                            <i class="fa-brands fa-java"></i>
+                            <span><strong>JavaFX 22</strong> - Interface gráfica desktop</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-file-code"></i>
+                            <span><strong>FXML</strong> - Layouts declarativos XML</span>
+                        </li>
+                        <li>
+                            <i class="fa-brands fa-css3-alt"></i>
+                            <span><strong>CSS Customizado</strong> - Design moderno</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-icons"></i>
+                            <span><strong>FontAwesome</strong> - Biblioteca de ícones</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-diagram-project"></i>
+                        </div>
+                        <h2 class="card-title">Arquitetura MVC</h2>
+                    </div>
+                    <ul class="tech-list">
+                        <li>
+                            <i class="fa-solid fa-eye"></i>
+                            <span><strong>FXML (View)</strong> - Estrutura visual</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-gears"></i>
+                            <span><strong>Controller</strong> - Eventos e lógica</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-palette"></i>
+                            <span><strong>CSS (Style)</strong> - Aparência e design</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <strong>Login</strong>
+                    <span>Autenticação</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-house"></i>
+                    <strong>Home</strong>
+                    <span>Dashboard</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <strong>Solicitação</strong>
+                    <span>Novo cartão</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <strong>Faturas</strong>
+                    <span>Mensais</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <strong>Segurança</strong>
+                    <span>Bloqueio</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-sliders"></i>
+                    <strong>Configurações</strong>
+                    <span>Limite</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-key"></i>
+                    <strong>Senha</strong>
+                    <span>Alteração</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-database"></i>
+                    <strong>MySQL</strong>
+                    <span>Persistência</span>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <p><i class="fa-solid fa-check-circle"></i> <strong>Stack Completa:</strong> JavaFX + FXML + CSS | Hibernate/JPA + MySQL | Spring Boot Security + BCrypt</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Design e Estilização -->
+        <div class="slide">
+            <div class="slide-number">02 / 02</div>
+
+            <h1 class="slide-title">
+                <i class="fa-solid fa-paintbrush"></i>
+                Design System & UX
+            </h1>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-swatchbook"></i>
+                        </div>
+                        <h2 class="card-title">Sistema de Design</h2>
+                    </div>
+                    <ul class="tech-list">
+                        <li>
+                            <i class="fa-solid fa-droplet"></i>
+                            <span><strong>Cores:</strong> Azul corporativo (#1565C0)</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-font"></i>
+                            <span><strong>Tipografia:</strong> Segoe UI, San Francisco</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-shapes"></i>
+                            <span><strong>Componentes:</strong> Cards, botões, forms</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span><strong>Efeitos:</strong> Sombras, bordas, hover</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-brands fa-css3"></i>
+                        </div>
+                        <h2 class="card-title">Estilização CSS</h2>
+                    </div>
+                    <ul class="tech-list">
+                        <li>
+                            <i class="fa-solid fa-square"></i>
+                            <span><strong>Cards:</strong> Border-radius 12px, box-shadow</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-credit-card"></i>
+                            <span><strong>Cartão:</strong> Gradiente azul, sombra 3D</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-hand-pointer"></i>
+                            <span><strong>Botões:</strong> Primary, secondary, hover</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <span><strong>Layout:</strong> HBox, VBox, Grid flexíveis</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="two-cols">
+                <div class="col-section">
+                    <h3><i class="fa-solid fa-star"></i> Design Moderno</h3>
+                    <ul class="tech-list">
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            <span>Interface limpa e profissional</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            <span>Gradientes e sombras suaves</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            <span>Animações e transições</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-section">
+                    <h3><i class="fa-solid fa-users"></i> UX Intuitiva</h3>
+                    <ul class="tech-list">
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            <span>Validações em tempo real</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            <span>Feedback visual claro</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            <span>Navegação simplificada</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <p><i class="fa-solid fa-circle-check"></i> <strong>Resultado:</strong> Código organizado | Design consistente | Padrão MVC completo | Interface moderna e profissional</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Dots -->
+    <div class="dots">
+        <div class="dot active" data-slide="0"></div>
+        <div class="dot" data-slide="1"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+
+            if (n >= slides.length) currentSlide = slides.length - 1;
+            if (n < 0) currentSlide = 0;
+
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                showSlide(currentSlide);
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
