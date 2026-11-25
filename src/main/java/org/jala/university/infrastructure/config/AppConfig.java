@@ -60,7 +60,6 @@ public class AppConfig {
         System.out.println("DB_PORT: " + port);
         System.out.println("DB_NAME: " + name);
         System.out.println("DB_USER: " + user);
-        System.out.println("DB_PASSWORD: " + pass);
 
         String url = "jdbc:mysql://" + host + ":" + port + "/" + name;
 

@@ -1,93 +1,171 @@
-# credit-card-module
+# 💳 Credit Card Module
 
+Aplicação desktop de gestão de cartões de crédito, da solicitação com limite pré-aprovado ao pagamento de faturas, construída em Java 17, JavaFX e JPA/Hibernate com MySQL.
 
+![Demonstração](docs/demo.gif)
+<!-- TODO: gravar um GIF (login → home → fatura → bloqueio de cartão) e salvar em docs/demo.gif -->
 
-## Getting started
+## Sobre o projeto
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Projeto de estudo desenvolvido em equipe, que simula o módulo de cartão de crédito de um banco digital. O usuário solicita um cartão, recebe um limite pré-aprovado calculado a partir da renda, acompanha as faturas e gerencia o cartão (limite, vencimento, bloqueio e senha) por uma interface desktop.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? 
+O foco do projeto foi praticar arquitetura em camadas, persistência com JPA, testes unitários e trabalho colaborativo com branches de feature e merge requests.
 
-## Add your files
+## Funcionalidades
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- **Login** por CPF e senha (senha armazenada com hash BCrypt).
+- **Solicitação de cartão**: escolha entre os tipos Gold, Internacional, Infinite e Platinum, com cálculo de limite pré-aprovado a partir da renda mensal e geração de número, CVV e validade.
+- **Home** com carrossel dos cartões do usuário, status do cartão e transações recentes.
+- **Ajuste de limite e dia de vencimento**, com reajuste automático das faturas futuras.
+- **Bloqueio e desbloqueio temporário** do cartão, com validação de titularidade e senha.
+- **Troca de senha do cartão** (4 dígitos), exigindo a senha de login.
+- **Faturas**: linha do tempo com fatura anterior, atual e próxima, detalhamento das parcelas de compras e cálculo do limite disponível.
+- **Pagamento e antecipação de fatura** via PIX, boleto, débito ou crédito, com liberação imediata do limite.
+- **Exportação da fatura em PDF.**
+
+## Tecnologias
+
+| Camada | Tecnologias |
+|---|---|
+| Linguagem / Build | Java 17, Maven |
+| Interface | JavaFX 22 (FXML + CSS), FontAwesomeFX |
+| Persistência | Jakarta Persistence (JPA) 3.1, Hibernate ORM 6.5 |
+| Banco de dados | MySQL 8 |
+| Segurança | Spring Security Crypto (BCrypt) |
+| Utilitários | Lombok, dotenv-java, iText (PDF) |
+| Testes | JUnit 5, Mockito |
+| Qualidade | Checkstyle |
+
+## Arquitetura
+
+O código é organizado em camadas, com as regras de negócio separadas da interface e da persistência. As interfaces de repositório ficam no domínio e as implementações JPA ficam na infraestrutura. A classe `AppConfig` atua como *composition root*: cria o `EntityManager`, os repositórios e os serviços e os entrega aos controllers.
+
+```mermaid
+flowchart TD
+    subgraph Presentation["Presentation (JavaFX)"]
+        V[Views FXML + CSS]
+        C[Controllers]
+        UI[Componentes reutilizáveis]
+    end
+
+    subgraph Application
+        S[Services]
+        D[DTOs]
+        M[Mappers]
+    end
+
+    subgraph Domain
+        E[Entidades JPA + Enums]
+        R[Interfaces de repositório]
+    end
+
+    subgraph Infrastructure
+        RI[Repositórios JPA / Hibernate]
+        CFG[AppConfig + .env]
+        H[PasswordHashUtil - BCrypt]
+    end
+
+    DB[(MySQL)]
+
+    V --> C
+    UI --> C
+    C --> S
+    S --> D
+    S --> M
+    M --> E
+    S --> R
+    RI -. implementa .-> R
+    RI --> E
+    RI --> DB
+    CFG -. injeta dependências .-> C
+    CFG -. cria .-> RI
+    S --> H
+```
+
+**Padrões utilizados:** arquitetura em camadas, Repository, Service, DTO + Mapper, Singleton e Builder.
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/jala-university1/cohort-2/desarrollo-de-software-2-es/practitioners/capstone/credit-card-module.git
-git branch -M main
-git push -uf origin main
+src/main/java/.../
+├── domain/          # entidades, enums e interfaces de repositório
+├── application/     # serviços, DTOs, mappers e sessão
+├── infrastructure/  # repositórios JPA, configuração e utilitários
+└── presentation/    # controllers, componentes e contexto de navegação
+src/main/resources/  # telas FXML, CSS, imagens e persistence.xml
 ```
 
-## Integrate with your tools
+## Como executar
 
-- [ ] [Set up project integrations](https://gitlab.com/jala-university1/cohort-2/desarrollo-de-software-2-es/practitioners/capstone/credit-card-module/-/settings/integrations)
+### Pré-requisitos
 
-## Collaborate with your team
+- JDK 17
+- Maven 3.9+
+- MySQL 8 em execução
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+> **Sobre a dependência `commons-module`:** o projeto depende do `commons-module`, uma biblioteca compartilhada da equipe (responsável pela navegação entre telas) hospedada em um registry Maven privado. Sem acesso a ela, o projeto não compila. Mesmo assim, todo o código deste módulo está disponível aqui para leitura e avaliação.
 
-## Test and Deploy
+### 1. Configure o banco
 
-Use the built-in continuous integration in GitLab.
+Crie um banco vazio no MySQL. As tabelas são criadas automaticamente pelo Hibernate (`hbm2ddl.auto=update`) na primeira execução.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```sql
+CREATE DATABASE credit_card;
+```
 
-***
+### 2. Crie o arquivo `.env` na raiz do projeto
 
-# Editing this README
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=credit_card
+DB_USER=seu_usuario
+DB_PASSWORD=sua_senha
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+> O arquivo `.env` é obrigatório: a aplicação não inicia sem ele.
 
-## Suggestions for a good README
+### 3. Compile e execute
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+mvn clean compile
+mvn javafx:run
+```
 
-## Name
-Choose a self-explaining name for your project.
+<!-- TODO: explicar como obter um primeiro acesso (o login é feito com o CPF e a senha informados ao solicitar um cartão pela tela "Solicitar cartão"?). -->
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Como rodar os testes
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+mvn test
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Os testes unitários usam JUnit 5 e Mockito (não precisam de banco de dados) e cobrem:
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+- `CreditCardServiceImplTest`: troca de senha do cartão (validações de entrada, titularidade, senha de login e sucesso).
+- `InvoiceServiceImplTest`: pagamento de fatura, liberação de limite e listagem de faturas.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+> O Checkstyle roda na fase `validate`, então violações de estilo interrompem o build antes dos testes.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Minha contribuição
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Atuei principalmente no **domínio do cartão de crédito** e nas funcionalidades de **gestão e segurança do cartão**:
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+- **Projetei** a entidade `CreditCard` e sua camada de acesso a dados: repositório, DTOs e o `CreditCardMapper`.
+- **Implementei** o ajuste de limite e do dia de vencimento, incluindo o reajuste automático das faturas futuras (nova consulta no `InvoiceRepository`) e a validação por senha.
+- **Implementei** o bloqueio e desbloqueio temporário do cartão, com regras de transição de status (ativo ↔ bloqueado) e verificação de titularidade.
+- **Implementei** a troca de senha do cartão com hash BCrypt e validação da senha de login, e **escrevi** os 7 testes unitários dessa funcionalidade com JUnit 5 e Mockito.
+- **Corrigi** a busca e o mapeamento de detalhes de fatura no `InvoiceService`.
+- **Ajustei** a configuração do Checkstyle e **revisei e integrei** merge requests de features da equipe na branch de desenvolvimento.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+<!-- TODO: complementar com contribuições que não aparecem no git (ex.: telas que você desenhou, revisões de código, organização das tarefas). -->
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Equipe
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+- Rodrigo Arraes
+- Amaury Magno
+- David Vida
+- Hudson <!-- TODO: sobrenome (commits como "HudsonSilv2") -->
+- Joaquin Arrazola
+- Miguel Montalvo
+- Mikael David <!-- TODO: confirmar se "Mikael Lopes" nos commits é a mesma pessoa -->
 
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+<!-- TODO: adicionar links de GitHub/LinkedIn dos integrantes, se desejar. -->
