@@ -8,3 +8,7 @@ src/main/java/org/jala/university/env
 database/
 .DS_Store
 *.backup
+
+.DS_Store
+*.iml
+*.backup
