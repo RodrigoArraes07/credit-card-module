@@ -103,7 +103,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                     .cardType(request.getCardType())
                     .cvc(cvv)
                     .expiration(expiration)
-                    .passwordHash(request.getPassword())
+                    .passwordHash(PasswordHashUtil.hashPassword(request.getPassword()))
                     .status(CreditCardStatus.ACTIVE)
                     .user(user)
                     .build();
@@ -178,7 +178,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 return buildUpdateErrorResponse("Cartão não encontrado.");
             }
 
-            if (updateDto.getPassword() == null || !creditCard.getPasswordHash().equals(updateDto.getPassword())) {
+            if (updateDto.getPassword() == null || !PasswordHashUtil.verifyPassword(updateDto.getPassword(), creditCard.getPasswordHash())) {
                 return buildUpdateErrorResponse("Senha incorreta.");
             }
 
@@ -321,7 +321,7 @@ public class CreditCardServiceImpl implements CreditCardService {
                 return buildStatusErrorResponse(creditCard, "Usuário não autorizado para este cartão.");
             }
 
-            if (!creditCard.getPasswordHash().equals(requestDto.getUserPassword())) {
+            if (!PasswordHashUtil.verifyPassword(requestDto.getUserPassword(), creditCard.getPasswordHash())) {
                 return buildStatusErrorResponse(creditCard, "Senha do cartão incorreta.");
             }
 
@@ -414,7 +414,7 @@ public class CreditCardServiceImpl implements CreditCardService {
             }
 
             if (creditCard.getPasswordHash() != null
-                    && creditCard.getPasswordHash().equals(requestDto.getNewPassword())) {
+                    && PasswordHashUtil.verifyPassword(requestDto.getNewPassword(), creditCard.getPasswordHash())) {
                 return buildPasswordErrorResponse(creditCard, "A nova senha não pode ser igual à senha atual.");
             }
 

@@ -168,7 +168,7 @@ class CreditCardServiceImplTest {
                 .maskCardNumber("**** **** **** 3456")
                 .status(CreditCardStatus.ACTIVE)
                 .user(user)
-                .passwordHash("1234")
+                .passwordHash(PasswordHashUtil.hashPassword("1234"))
                 .build();
 
         when(creditCardRepository.findByCardNumber("1234567890123456")).thenReturn(creditCard);
@@ -200,7 +200,7 @@ class CreditCardServiceImplTest {
                 .maskCardNumber("**** **** **** 3456")
                 .status(CreditCardStatus.ACTIVE)
                 .user(user)
-                .passwordHash("1234")
+                .passwordHash(PasswordHashUtil.hashPassword("1234"))
                 .build();
 
         when(creditCardRepository.findByCardNumber("1234567890123456")).thenReturn(creditCard);
