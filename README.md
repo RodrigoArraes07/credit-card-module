@@ -162,10 +162,7 @@ Atuei principalmente no **domínio do cartão de crédito** e nas funcionalidade
 
 - Rodrigo Arraes
 - Amaury Magno
-- David Vida
 - Hudson <!-- TODO: sobrenome (commits como "HudsonSilv2") -->
-- Joaquin Arrazola
-- Miguel Montalvo
 - Mikael David <!-- TODO: confirmar se "Mikael Lopes" nos commits é a mesma pessoa -->
 
 <!-- TODO: adicionar links de GitHub/LinkedIn dos integrantes, se desejar. -->
